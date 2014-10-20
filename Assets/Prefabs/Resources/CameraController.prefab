@@ -26,8 +26,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
-  m_LocalRotation: {x: .087155737, y: 0, z: 0, w: .99619472}
-  m_LocalPosition: {x: .51616025, y: 1.53060818, z: -4.2618494}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 14.0856838, y: 5.00858402, z: -12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -41,7 +41,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: .192156866, g: .301960796, b: .474509805, a: .0196078438}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: .0196078438}
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -90,7 +90,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
-  zDistanceFromTarget: 10
+  zDistanceFromTarget: 12
   cameraOffsetMovingRight: {x: 3, y: 3, z: 0}
   cameraOffsetMovingLeft: {x: -3, y: 3, z: 0}
   horizontalMovementSpeed: 5
@@ -99,9 +99,9 @@ MonoBehaviour:
   depthMovementSpeed: 5
   topThreshold: .200000003
   bottomThreshold: .5
-  rightThreshold: 1.5
-  leftThreshold: 1.5
-  horizontalDeadZone: 1.5
+  rightThreshold: 3
+  leftThreshold: 3
+  horizontalDeadZone: 2
   rightStickLookDistance: {x: 15, y: 10, z: 0}
   rightStickDownMultiplier: .349999994
 --- !u!124 &12400000
