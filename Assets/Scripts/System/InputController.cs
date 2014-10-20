@@ -51,17 +51,22 @@ public class InputController : Singleton<InputController> {
 		float rawXValue = xValue;
 		float rawYValue = yValue;
 		
-		if(Mathf.Abs(xValue) < leftStick.deadZone.x)
+		if(Mathf.Abs(xValue) < leftStick.deadZone)
 		{
 			xValue = 0;
 		}
 		
-		if(Mathf.Abs(yValue) < leftStick.deadZone.y)
+		if(Mathf.Abs(yValue) < leftStick.deadZone)
 		{
 			yValue = 0;
 		}
 		
-		vectorToReturn = new Vector2(xValue * leftStick.sensitivity.x, yValue * leftStick.sensitivity.y);
+		//vectorToReturn = new Vector2(xValue * leftStick.sensitivity.x, yValue * leftStick.sensitivity.y);
+		vectorToReturn = new Vector2(xValue, yValue);
+		vectorToReturn = vectorToReturn.normalized * ((vectorToReturn.magnitude - leftStick.deadZone) / (1 - leftStick.deadZone));
+		vectorToReturn.x *= leftStick.sensitivity.x;
+		vectorToReturn.y *= leftStick.sensitivity.y;
+		
 		vectorToReturn = Vector2.ClampMagnitude(vectorToReturn, 1);
 		Vector2 vectorWithLerp = vectorToReturn;
 
@@ -93,17 +98,22 @@ public class InputController : Singleton<InputController> {
 		float xValue = rightStickVector.x;
 		float yValue = rightStickVector.y;
 
-		if(Mathf.Abs(xValue) < rightStick.deadZone.x)
+		if(Mathf.Abs(xValue) < rightStick.deadZone)
 		{
 			xValue = 0;
 		}
 
-		if(Mathf.Abs(yValue) < rightStick.deadZone.y)
+		if(Mathf.Abs(yValue) < rightStick.deadZone)
 		{
 			yValue = 0;
 		}
 
-		vectorToReturn = new Vector2(xValue * rightStick.sensitivity.x, yValue * rightStick.sensitivity.y);
+		//vectorToReturn = new Vector2(xValue * rightStick.sensitivity.x, yValue * rightStick.sensitivity.y);
+		vectorToReturn = new Vector2(xValue, yValue);
+		vectorToReturn = vectorToReturn.normalized * ((vectorToReturn.magnitude - rightStick.deadZone) / (1 - rightStick.deadZone));
+		vectorToReturn.x *= rightStick.sensitivity.x;
+		vectorToReturn.y *= rightStick.sensitivity.y;
+		
 		vectorToReturn = Vector2.ClampMagnitude(vectorToReturn, 1);
 
 		return vectorToReturn;
@@ -128,7 +138,7 @@ public class InputController : Singleton<InputController> {
 	public class JoystickParameters
 	{
 		public Vector2 sensitivity;
-		public Vector2 deadZone;
+		public float deadZone;
 	}
 
 	public InputControl GetControl(InputControlType type)
