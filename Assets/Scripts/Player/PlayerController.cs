@@ -17,10 +17,7 @@ public class PlayerController : Singleton<PlayerController> {
 	
 	[Tooltip("All spawn-related parameters are nested here.")]
 	public SpawnParameters spawn;
-	
-	[Tooltip("Input controls for the player are nested here:\n\nAction1: A / Cross\nAction2: B / Circle\nAction3: X / Square\nAction4: Y / Triangle\n\nLeftStickX, Y and LeftStickButton\nRightStickX, Y and RightStickButton\n\nDPadUp, Down, Left, Right\n\nRightBumper: RB / R1\nLeftBumper: LB / L1\n\nRightTrigger: RT / R2\nLeftTrigger: LT / L2")]
-	public PlayerControls controls;
-	
+		
 	[Tooltip("All movement-related parameters are nested here.")]
 	public MovementParameters movement;
 	
@@ -259,7 +256,7 @@ public class PlayerController : Singleton<PlayerController> {
 		// REPLACE BY RAYCAST
 		currentlyGrounded = IsGrounded();
 		
-		if(!InputController.Instance.GetControl(controls.jump).IsPressed)
+		if(!InputController.Instance.GetControl(InputController.Instance.controls.jump).IsPressed)
 		{
 			jumpWasReleased = true;
 		}
@@ -348,7 +345,7 @@ public class PlayerController : Singleton<PlayerController> {
 	{
 		bool jumpRequested = false;
 		
-		if(InputController.Instance.GetControl(controls.jump).IsPressed && jumpWasReleased)
+		if(InputController.Instance.GetControl(InputController.Instance.controls.jump).IsPressed && jumpWasReleased)
 		{
 			jumpRequested = true;
 			jumpWasReleased = false;
@@ -681,15 +678,6 @@ public class PlayerController : Singleton<PlayerController> {
 		public AnimationCurve riseAcceleration;
 		[Tooltip("Determines how much the player controls his horizontal movement while he's in the air:\n0 means no control at all.\n1 means total control as if he were on the ground.")]
 		public float airControlFactor;
-	}
-	
-	[System.Serializable]
-	public class PlayerControls
-	{
-		[Tooltip("Button used for jump action.")]
-		public InputControlType jump;
-		[Tooltip("Button used for using an object / interaction.")]
-		public InputControlType use;
 	}
 	
 	[System.Serializable]

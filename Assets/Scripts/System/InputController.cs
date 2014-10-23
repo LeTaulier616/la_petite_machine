@@ -13,8 +13,14 @@ public class InputController : Singleton<InputController> {
 	private Vector2 dPadVector = Vector2.zero;
 	private Vector2 direction = Vector2.zero;
 
+	[Tooltip("Input settings for the left stick")]
 	public JoystickParameters leftStick;
+	
+	[Tooltip("Input settings for the right stick")]
 	public JoystickParameters rightStick;
+	
+	[Tooltip("Input controls for the player are nested here:\n\nAction1: A / Cross\nAction2: B / Circle\nAction3: X / Square\nAction4: Y / Triangle\n\nLeftStickX, Y and LeftStickButton\nRightStickX, Y and RightStickButton\n\nDPadUp, Down, Left, Right\n\nRightBumper: RB / R1\nLeftBumper: LB / L1\n\nRightTrigger: RT / R2\nLeftTrigger: LT / L2")]
+	public PlayerControls controls;
 
 	private float timeParameter = 0;
 
@@ -145,5 +151,33 @@ public class InputController : Singleton<InputController> {
 	{
 		return activeDevice.GetControl(type);
 	
+	}
+	
+	[System.Serializable]
+	public class PlayerControls
+	{
+		[Tooltip("Button used for jump action.")]
+		public InputControlType jump;
+		
+		[Tooltip("Button used for using an object / interaction.")]
+		public InputControlType use;
+		
+		[Tooltip("Button used to aim")]
+		public InputControlType aim;
+		
+		[Tooltip("Button used to fire")]
+		public InputControlType fire;
+		
+		[Tooltip("Button used to change firing item - left")]
+		public InputControlType switchLeft;
+		
+		[Tooltip("Button used to change firing item - right")]
+		public InputControlType switchRight;
+		
+		[Tooltip("Button used to change form - up")]
+		public InputControlType switchUp;
+		
+		[Tooltip("Button used to change form - down")]
+		public InputControlType switchDown;
 	}
 }
