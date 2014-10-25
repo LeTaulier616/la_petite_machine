@@ -562,8 +562,8 @@ public class PlayerController : Singleton<PlayerController> {
 	
 	public void ApplyAirControlFactor()
 	{
-		if(PlayerController.Instance.jumpDirection == Direction.None ||
-		   PlayerController.Instance.horizontalDirection != PlayerController.Instance.jumpDirection)
+		//if(PlayerController.Instance.jumpDirection == Direction.None ||
+		//   PlayerController.Instance.horizontalDirection != PlayerController.Instance.jumpDirection)
 		{
 			movementVector = new Vector3 (
 				movementVector.x * movement.airControlFactor,

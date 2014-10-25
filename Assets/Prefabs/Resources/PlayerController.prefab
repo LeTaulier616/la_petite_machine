@@ -54,7 +54,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100002}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 13, y: 2, z: 0}
+  m_LocalPosition: {x: 7, y: 2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 400000}
@@ -104,24 +104,21 @@ MonoBehaviour:
     m_Bits: 1
   spawn:
     position: {x: 0, y: 5, z: 0}
-  controls:
-    jump: 10
-    use: 12
   movement:
-    horizontalSpeed: 9
+    horizontalSpeed: 10
     horizontalAcceleration:
       serializedVersion: 2
       m_Curve:
       - time: 0
         value: 0
-        inSlope: 3.77037334
-        outSlope: 3.77037334
+        inSlope: 12.9028769
+        outSlope: 12.9028769
         tangentMode: 0
-      - time: .257963091
-        value: .721049428
-        inSlope: 1.14649534
-        outSlope: 1.14649534
-        tangentMode: 0
+      - time: .150000006
+        value: .850000024
+        inSlope: 1.22915077
+        outSlope: .516858757
+        tangentMode: 1
       - time: 1
         value: 1
         inSlope: 0
@@ -129,8 +126,8 @@ MonoBehaviour:
         tangentMode: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
-    horizontalGroundStopSpeed: 15
-    horizontalAirStopSpeed: 7
+    horizontalGroundStopSpeed: 10
+    horizontalAirStopSpeed: 2
     fallingSpeed: 4
     fallingAcceleration:
       serializedVersion: 2
@@ -152,8 +149,8 @@ MonoBehaviour:
         tangentMode: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
-    jumpHeight: 3
-    jumpRiseSpeed: 12
+    jumpHeight: 3.25
+    jumpRiseSpeed: 13
     riseAcceleration:
       serializedVersion: 2
       m_Curve:
@@ -174,7 +171,7 @@ MonoBehaviour:
         tangentMode: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
-    airControlFactor: .800000012
+    airControlFactor: .75
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1
