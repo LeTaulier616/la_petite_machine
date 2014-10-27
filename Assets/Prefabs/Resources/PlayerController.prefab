@@ -103,9 +103,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   spawn:
-    position: {x: 0, y: 5, z: 0}
+    position: {x: 0, y: 0, z: 0}
   movement:
-    horizontalSpeed: 10
+    horizontalSpeed: 11
     horizontalAcceleration:
       serializedVersion: 2
       m_Curve:
@@ -149,7 +149,7 @@ MonoBehaviour:
         tangentMode: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
-    jumpHeight: 3.25
+    jumpHeight: 3.5
     jumpRiseSpeed: 13
     riseAcceleration:
       serializedVersion: 2
