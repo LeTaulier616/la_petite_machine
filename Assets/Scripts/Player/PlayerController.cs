@@ -65,15 +65,15 @@ public class PlayerController : Singleton<PlayerController> {
 	private bool stickToTheGround = false;
 	
 	private Vector2 leftStick;
-	private float leftTrigger; //Michel
-	private float rightTrigger; //Michel
+	private float leftTrigger; 
+	private float rightTrigger; 
 	
 	private StateMachine stateMachine;
 	public IdleState idle;
 	public MoveState moving;
 	public JumpState jumping;
 	public FallState falling;
-	public AimState aiming; //Michel
+	public AimState aiming; 
 	
 	private bool canMove;
 	private bool canJump;
@@ -100,7 +100,7 @@ public class PlayerController : Singleton<PlayerController> {
 		moving = new MoveState();
 		jumping = new JumpState();
 		falling = new FallState();
-		aiming = new AimState(); // Michel
+		aiming = new AimState(); 
 				
 		stateMachine.SetState(idle);
 
@@ -121,9 +121,7 @@ public class PlayerController : Singleton<PlayerController> {
 		{
 			PlayerController.Instance.StickToGround();
 			PlayerController.Instance.UpdateMovement();
-			/*CHARLES START*/
 			PlayerController.Instance.UpdateLaneChangeMovement();
-			/*CHARLES END*/
 			PlayerController.Instance.UpdateGravity();
 			PlayerController.Instance.ApplyMovementDeceleration();
 			PlayerController.Instance.MoveCharacter();
@@ -141,7 +139,7 @@ public class PlayerController : Singleton<PlayerController> {
 			if(PlayerController.Instance.JumpRequested() && PlayerController.Instance.CanJump())
 				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.jumping);
 				
-			//MICHEL //Idle to aim state handling
+			//Idle to aim state handling
 			if(PlayerController.Instance.AimRequested())
 				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.aiming);
 		}
@@ -187,7 +185,7 @@ public class PlayerController : Singleton<PlayerController> {
 				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.jumping);
 			}
 			
-			//MICHEL //Idle to aim state handling
+			//Idle to aim state handling
 			if(PlayerController.Instance.AimRequested())
 				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.aiming);
 				
@@ -283,7 +281,6 @@ public class PlayerController : Singleton<PlayerController> {
 		}
 	}
 	
-	/*MICHEL*/
 	public class AimState : State
 	{
 		public override void EnterState(GameObject go)
@@ -307,6 +304,8 @@ public class PlayerController : Singleton<PlayerController> {
 		 	{
 		 	
 		 	}
+		 	
+		 	PlayerController.Instance.MoveCharacter();
 		}
 		 
 		public override void LateUpdateState(GameObject go)
@@ -319,7 +318,6 @@ public class PlayerController : Singleton<PlayerController> {
 		 	CursorController.Instance.Hide();
 		}
 	}
-	/*MICHEL*/
 	
 	private void Update()
 	{
@@ -331,8 +329,8 @@ public class PlayerController : Singleton<PlayerController> {
 	{
 		leftStickDelta = new Vector2(Mathf.Abs(InputController.Instance.LeftStick().x) - Mathf.Abs(leftStick.x), Mathf.Abs(InputController.Instance.LeftStick().y) - Mathf.Abs(leftStick.y));
 		leftStick = InputController.Instance.LeftStick();
-		leftTrigger = InputController.Instance.LeftTrigger(); //Michel
-		rightTrigger = InputController.Instance.RightTrigger(); //Michel
+		leftTrigger = InputController.Instance.LeftTrigger();
+		rightTrigger = InputController.Instance.RightTrigger();
 		movementVector = Vector3.zero;
 		currentPosition = transform.position;
 		deltaPosition = currentPosition - previousFramePosition;
@@ -620,8 +618,8 @@ public class PlayerController : Singleton<PlayerController> {
 		return jumpRequested;
 	}
 	
-	/*MICHEL*/
-	public bool AimRequested()
+
+		public bool AimRequested()
 	{
 		bool aimRequested = false;
 		
@@ -640,9 +638,7 @@ public class PlayerController : Singleton<PlayerController> {
 		
 		return aimRequested;
 	}
-	/*MICHEL*/
 	
-	/*MICHEL*/
 	public bool ShootRequested()
 	{
 		bool shootRequested = false;
@@ -662,7 +658,6 @@ public class PlayerController : Singleton<PlayerController> {
 		
 		return shootRequested;
 	}
-	/*MICHEL*/
 	
 	public bool CanMove()
 	{
