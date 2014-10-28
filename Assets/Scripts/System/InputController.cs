@@ -6,6 +6,8 @@ public class InputController : Singleton<InputController> {
 	
 	private Vector2 leftStickVector = Vector2.zero;
 	private Vector2 rightStickVector = Vector2.zero;
+	private float leftTriggerValue = 0.0f;
+	private float rightTriggerValue = 0.0f;
 
 	private Vector2 previousLeftStickVector = Vector2.zero;
 	private Vector2 previousRightStickVector = Vector2.zero;
@@ -19,12 +21,18 @@ public class InputController : Singleton<InputController> {
 	[Tooltip("Input settings for the right stick")]
 	public JoystickParameters rightStick;
 	
+	[Tooltip("Input settings for the left trigger")]
+	public TriggerParameters leftTrigger;
+	
+	[Tooltip("Input settings for the right trigger")]
+	public TriggerParameters rightTrigger;
+	
 	[Tooltip("Input controls for the player are nested here:\n\nAction1: A / Cross\nAction2: B / Circle\nAction3: X / Square\nAction4: Y / Triangle\n\nLeftStickX, Y and LeftStickButton\nRightStickX, Y and RightStickButton\n\nDPadUp, Down, Left, Right\n\nRightBumper: RB / R1\nLeftBumper: LB / L1\n\nRightTrigger: RT / R2\nLeftTrigger: LT / L2")]
 	public PlayerControls controls;
 
 	private float timeParameter = 0;
 
-	InputDevice activeDevice;
+	public InputDevice activeDevice;
 
 	// Use this for initialization
 	void Start () {
@@ -38,12 +46,17 @@ public class InputController : Singleton<InputController> {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update () 
+	{
 		InputManager.Update();
-
+		
 		activeDevice = InputManager.ActiveDevice;
 		leftStickVector = activeDevice.LeftStick.Vector;
 		rightStickVector = activeDevice.RightStick.Vector;
+		
+		leftTriggerValue = activeDevice.LeftTrigger.Value;
+		rightTriggerValue = activeDevice.RightTrigger.Value;
+				
 		dPadVector = activeDevice.DPad.Vector;
 		direction = activeDevice.Direction.Vector;
 	}
@@ -124,6 +137,34 @@ public class InputController : Singleton<InputController> {
 
 		return vectorToReturn;
 	}
+	
+	public float LeftTrigger()
+	{
+		float valueToReturn = 0.0f;
+		
+		valueToReturn = leftTriggerValue;
+		
+		if(valueToReturn < leftTrigger.deadZone)
+		{
+			valueToReturn = 0.0f;
+		}
+		
+		return valueToReturn;
+	}
+	
+	public float RightTrigger()
+	{
+		float valueToReturn = 0.0f;
+		
+		valueToReturn = rightTriggerValue;
+		
+		if(valueToReturn < rightTrigger.deadZone)
+		{
+			valueToReturn = 0.0f;
+		}
+		
+		return valueToReturn;
+	}
 
 	private void OnNewDeviceAttached(InputDevice newlyAttachedDevice)
 	{
@@ -144,6 +185,12 @@ public class InputController : Singleton<InputController> {
 	public class JoystickParameters
 	{
 		public Vector2 sensitivity;
+		public float deadZone;
+	}
+	
+	[System.Serializable]
+	public class TriggerParameters
+	{
 		public float deadZone;
 	}
 

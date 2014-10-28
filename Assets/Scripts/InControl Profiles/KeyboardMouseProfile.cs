@@ -42,7 +42,7 @@ namespace CustomProfileKeyboardMouse
 				{
 					Handle = "Aim",
 					Target = InputControlType.LeftTrigger,
-					Source = MouseButton2
+					Source = MouseButton1
 				},
 				new InputControlMapping
 				{
