@@ -9,9 +9,8 @@ GameObject:
   m_Component:
   - 4: {fileID: 400000}
   - 114: {fileID: 11400000}
-  - 114: {fileID: 11400002}
   m_Layer: 0
-  m_Name: InputController
+  m_Name: Reticle_Atlas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -37,46 +36,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 100000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 41f828a0f9b25c045aa849ba2b127311, type: 3}
+  m_Script: {fileID: 11500000, guid: 4d0c51bb0b6e93049af5e88f93826e3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  leftStick:
-    sensitivity: {x: 1, y: 1}
-    deadZone: .200000003
-  rightStick:
-    sensitivity: {x: 1, y: 1}
-    deadZone: .100000001
-  leftTrigger:
-    deadZone: .400000006
-  rightTrigger:
-    deadZone: .400000006
-  controls:
-    jump: 10
-    use: 11
-    aim: 14
-    fire: 15
-    switchLeft: 8
-    switchRight: 9
-    switchUp: 6
-    switchDown: 7
---- !u!114 &11400002
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100000}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7b5e8de77c5b4597ae7fbfb49a95e22, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  logDebugInfo: 0
-  invertYAxis: 0
-  enableXInput: 1
-  useFixedUpdate: 0
-  dontDestroyOnLoad: 0
-  customProfiles:
-  - CustomProfileKeyboardMouse.KeyboardMouseProfile
+  material: {fileID: 2100000, guid: 54b764c6674810844aabb12c91117697, type: 2}
+  mSprites:
+  - name: Reticle-01
+    x: 0
+    y: 86
+    width: 426
+    height: 426
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 43
+    paddingRight: 43
+    paddingTop: 43
+    paddingBottom: 43
+  mPixelSize: 1
+  mReplacement: {fileID: 0}
+  mCoordinates: 0
+  sprites: []
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

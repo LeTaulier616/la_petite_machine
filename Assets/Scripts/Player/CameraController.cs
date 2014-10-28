@@ -53,6 +53,8 @@ public class CameraController : Singleton<CameraController>{
 	private PlayerController.Direction rightStickSwipeDirection;
 	private PlayerController.Direction startedSwipeDirection;
 	private float rightStickMovedDuration = 0;
+	
+	private bool canLook; //Michel
 
 	void Start()
 	{
@@ -73,6 +75,8 @@ public class CameraController : Singleton<CameraController>{
 		currentCameraOffset = new Vector3(0,cameraOffsetMovingLeft.y,0);
 		defaultEulerAngles = transform.eulerAngles;
 		cameraOrientationLerpTime = 0f;
+		
+		canLook = true; //Michel
 
 		if(target == null)
 		{
@@ -82,9 +86,10 @@ public class CameraController : Singleton<CameraController>{
 
 	void Update()
 	{
-		CheckRightStickSwipe();
+		if(canLook)
+			CheckRightStickSwipe();
+			
 		UpdateCameraMovement();
-
 	}
 
 	void LateUpdate()
@@ -96,17 +101,20 @@ public class CameraController : Singleton<CameraController>{
 	{
 		if(target != null)
 		{
-			rightStickCamOffset = new Vector3(InputController.Instance.RightStick().x * rightStickLookDistance.x,
-			InputController.Instance.RightStick().y * rightStickLookDistance.y,
-			rightStickLookDistance.z);
-			 
-			if(InputController.Instance.RightStick().y < 0.0f)
+			if(canLook)
 			{
-				rightStickCamOffset.y *= rightStickDownMultiplier;
-			} 
+				rightStickCamOffset = new Vector3(InputController.Instance.RightStick().x * rightStickLookDistance.x,
+				InputController.Instance.RightStick().y * rightStickLookDistance.y,
+				rightStickLookDistance.z);
+				 
+				if(InputController.Instance.RightStick().y < 0.0f)
+				{
+					rightStickCamOffset.y *= rightStickDownMultiplier;
+				} 
+				
+				rightStickCamOffset *= GameController.DeltaTime();
+			}
 			 
-			rightStickCamOffset *= GameController.DeltaTime();
-
 			Vector3 movementVector = Vector3.zero;
 			Vector3 targetWorldPos = target.position;
 			Vector3 targetScreenPoint = camera.WorldToScreenPoint(targetWorldPos);
@@ -233,5 +241,10 @@ public class CameraController : Singleton<CameraController>{
 	{
 		SetTarget(PlayerController.Instance.transform);
 		isMoving = false;
+	}
+	
+	public void CanLook(bool state)
+	{
+		canLook = state;
 	}
 }
