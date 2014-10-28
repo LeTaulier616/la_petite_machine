@@ -23,6 +23,8 @@ public class CursorController : Singleton<CursorController>
 	
 	private float moveTime;
 	private float idleTime;
+
+	private bool shown = true;
 	
 	// Use this for initialization
 	void Start ()
@@ -57,6 +59,48 @@ public class CursorController : Singleton<CursorController>
 	
 	public void Show()
 	{
+		if(!shown)
+		{
+			shown = true;
+
+			StopCoroutine("HideRoutine");
+			StopCoroutine("ShowRoutine");
+
+			StartCoroutine("ShowRoutine");
+		}
+	}
+	
+	public void Hide()
+	{
+		if(shown)
+		{
+			shown = false;
+
+			StopCoroutine("HideRoutine");
+			StopCoroutine("ShowRoutine");
+
+			StartCoroutine("HideRoutine");
+		}
+	}
+
+	private IEnumerator HideRoutine()
+	{
+		reticle.transform.localScale = Vector3.one;
+		reticle.alpha = 1.0f;
+		
+		UITweener scaleTween = TweenScale.Begin(reticle.gameObject, fadeOutSpeed, Vector3.zero);
+		scaleTween.method = UITweener.Method.EaseInOut;
+		
+		UITweener alphaTween = TweenAlpha.Begin(reticle.gameObject, fadeOutSpeed, 0.0f);
+		alphaTween.method = UITweener.Method.EaseInOut;
+
+		yield return new WaitForSeconds(fadeOutSpeed);
+		
+		reticle.gameObject.SetActive(false);
+	}
+
+	private IEnumerator ShowRoutine()
+	{
 		ResetCursor();
 		reticle.gameObject.SetActive(true);
 		
@@ -68,20 +112,8 @@ public class CursorController : Singleton<CursorController>
 		
 		UITweener alphaTween = TweenAlpha.Begin(reticle.gameObject, fadeInSpeed, 1.0f);
 		alphaTween.method = UITweener.Method.EaseInOut;		
-	}
-	
-	public void Hide()
-	{
-		reticle.transform.localScale = Vector3.one;
-		reticle.alpha = 1.0f;
-		
-		UITweener scaleTween = TweenScale.Begin(reticle.gameObject, fadeOutSpeed, Vector3.zero);
-		scaleTween.method = UITweener.Method.EaseInOut;
-		
-		UITweener alphaTween = TweenAlpha.Begin(reticle.gameObject, fadeOutSpeed, 0.0f);
-		alphaTween.method = UITweener.Method.EaseInOut;
 
-		reticle.gameObject.SetActive(false, fadeOutSpeed);
+		yield return null;
 	}
 	
 	public void ResetCursor()

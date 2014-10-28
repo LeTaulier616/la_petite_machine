@@ -14,6 +14,7 @@ public class PlayerController : Singleton<PlayerController> {
 	public LayerMask defaultLayer;
 	
 	private bool isMoving = false;
+	private bool isAiming = false;
 	
 	[Tooltip("All spawn-related parameters are nested here.")]
 	public SpawnParameters spawn;
@@ -39,6 +40,7 @@ public class PlayerController : Singleton<PlayerController> {
 	private float jumpTime = 0;
 	private float currentHeightJumped = 0;
 	private float moveTime = 0;
+	private bool canAim = true;
 	
 	private float leftStickPositiveDuration = 0;
 	private float leftStickNegativeDuration = 0;
@@ -142,7 +144,7 @@ public class PlayerController : Singleton<PlayerController> {
 				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.jumping);
 				
 			//MICHEL //Idle to aim state handling
-			if(PlayerController.Instance.AimRequested())
+			if(PlayerController.Instance.AimRequested() && PlayerController.Instance.CanAim())
 				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.aiming);
 		}
 		
@@ -307,6 +309,8 @@ public class PlayerController : Singleton<PlayerController> {
 		 	{
 		 	
 		 	}
+
+			PlayerController.Instance.MoveCharacter();
 		}
 		 
 		public override void LateUpdateState(GameObject go)
@@ -431,7 +435,7 @@ public class PlayerController : Singleton<PlayerController> {
 		Vector2 currentLeftStickValue = InputController.Instance.LeftStick();
 		//lane.changeLaneRequested = false;
 
-		if(currentLeftStickValue != Vector2.zero)
+		if(!AimRequested() && currentLeftStickValue != Vector2.zero)
 		{
 			leftStickMovedDuration += GameController.DeltaTime();
 
@@ -674,6 +678,20 @@ public class PlayerController : Singleton<PlayerController> {
 		if(!IsGrounded())
 			canJump = false;
 		return canJump;
+	}
+
+	public bool CanAim()
+	{
+		if(lane.changeLaneRequested)
+			canAim = false;
+		else
+			canAim = true;
+		return canAim;
+	}
+
+	public void CanAim(bool state)
+	{
+		canAim = state;
 	}
 	
 	public void CanMove(bool state)
