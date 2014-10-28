@@ -54,12 +54,15 @@ public class PlayerController : Singleton<PlayerController> {
 	private bool stickToTheGround = false;
 	
 	private Vector2 leftStick;
+	private float leftTrigger; //Michel
+	private float rightTrigger; //Michel
 	
 	private StateMachine stateMachine;
 	public IdleState idle;
 	public MoveState moving;
 	public JumpState jumping;
 	public FallState falling;
+	public AimState aiming; //Michel
 	
 	private bool canMove;
 	private bool canJump;
@@ -86,11 +89,13 @@ public class PlayerController : Singleton<PlayerController> {
 		moving = new MoveState();
 		jumping = new JumpState();
 		falling = new FallState();
-		
+		aiming = new AimState(); // Michel
+				
 		stateMachine.SetState(idle);
 
 		CanMove(true);
 		CanJump(true);
+		CameraController.Instance.CanLook(true);
 	}
 	
 	public class IdleState : State
@@ -98,6 +103,7 @@ public class PlayerController : Singleton<PlayerController> {
 		public override void EnterState(GameObject go)
 		{
 			PlayerController.Instance.CanJump(true);
+			CameraController.Instance.CanLook(true);
 		}
 		
 		public override void UpdateState(GameObject go)
@@ -118,6 +124,10 @@ public class PlayerController : Singleton<PlayerController> {
 			// Idle to jump state handling
 			if(PlayerController.Instance.JumpRequested() && PlayerController.Instance.CanJump())
 				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.jumping);
+				
+			//MICHEL //Idle to aim state handling
+			if(PlayerController.Instance.AimRequested())
+				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.aiming);
 		}
 		
 		public override void ExitState(GameObject go)
@@ -132,6 +142,7 @@ public class PlayerController : Singleton<PlayerController> {
 		public override void EnterState(GameObject go)
 		{
 			PlayerController.Instance.CanJump(true);
+			CameraController.Instance.CanLook(true);
 		}
 		
 		public override void UpdateState(GameObject go)
@@ -157,6 +168,10 @@ public class PlayerController : Singleton<PlayerController> {
 				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.jumping);
 			}
 			
+			//MICHEL //Idle to aim state handling
+			if(PlayerController.Instance.AimRequested())
+				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.aiming);
+				
 			// Move to fall state handling
 			if(PlayerController.Instance.IsFalling())
 			{
@@ -239,6 +254,44 @@ public class PlayerController : Singleton<PlayerController> {
 		}
 	}
 	
+	/*MICHEL*/
+	public class AimState : State
+	{
+		public override void EnterState(GameObject go)
+		{
+		 	PlayerController.Instance.CanJump(false);
+		 	PlayerController.Instance.CanMove(false);
+		 	CameraController.Instance.CanLook(false);
+		 	CursorController.Instance.Show();
+		}
+		 
+		public override void UpdateState(GameObject go)
+		{
+		 	PlayerController.Instance.UpdateGravity();
+		 	
+		 	if(!PlayerController.Instance.AimRequested())
+		 	{
+				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.idle);
+		 	}
+		 	
+		 	if(PlayerController.Instance.ShootRequested())
+		 	{
+		 	
+		 	}
+		}
+		 
+		public override void LateUpdateState(GameObject go)
+		{
+		 
+		}
+		 
+		public override void ExitState(GameObject go)
+		{
+		 	CursorController.Instance.Hide();
+		}
+	}
+	/*MICHEL*/
+	
 	private void Update()
 	{
 		UpdateEarlyVariables();
@@ -249,6 +302,8 @@ public class PlayerController : Singleton<PlayerController> {
 	{
 		leftStickDelta = new Vector2(Mathf.Abs(InputController.Instance.LeftStick().x) - Mathf.Abs(leftStick.x), Mathf.Abs(InputController.Instance.LeftStick().y) - Mathf.Abs(leftStick.y));
 		leftStick = InputController.Instance.LeftStick();
+		leftTrigger = InputController.Instance.LeftTrigger(); //Michel
+		rightTrigger = InputController.Instance.RightTrigger(); //Michel
 		movementVector = Vector3.zero;
 		currentPosition = transform.position;
 		deltaPosition = currentPosition - previousFramePosition;
@@ -353,6 +408,50 @@ public class PlayerController : Singleton<PlayerController> {
 		
 		return jumpRequested;
 	}
+	
+	/*MICHEL*/
+	public bool AimRequested()
+	{
+		bool aimRequested = false;
+		
+		if(leftTrigger > 0.0f)
+		{
+			aimRequested = true;
+		}
+		
+		else if (InputController.Instance.activeDevice.Name == "Keyboard/Mouse")
+		{
+			if(InputController.Instance.GetControl(InputController.Instance.controls.aim).IsPressed)
+			{
+				aimRequested = true;
+			}
+		}
+		
+		return aimRequested;
+	}
+	/*MICHEL*/
+	
+	/*MICHEL*/
+	public bool ShootRequested()
+	{
+		bool shootRequested = false;
+		
+		if(rightTrigger > 0.0f)
+		{
+			shootRequested = true;
+		}
+		
+		else if (InputController.Instance.activeDevice.Name == "Keyboard/Mouse")
+		{
+			if(InputController.Instance.GetControl(InputController.Instance.controls.fire).IsPressed)
+			{
+				shootRequested = true;
+			}
+		}
+		
+		return shootRequested;
+	}
+	/*MICHEL*/
 	
 	public bool CanMove()
 	{

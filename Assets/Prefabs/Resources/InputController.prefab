@@ -46,6 +46,10 @@ MonoBehaviour:
   rightStick:
     sensitivity: {x: 1, y: 1}
     deadZone: .100000001
+  leftTrigger:
+    deadZone: .400000006
+  rightTrigger:
+    deadZone: .400000006
   controls:
     jump: 10
     use: 11

@@ -7,6 +7,11 @@ public class CursorController : Singleton<CursorController>
 	public AnimationCurve accelerationCurve;
 	public AnimationCurve decelerationCurve;
 	
+	public float fadeInSpeed;
+	public float fadeInSize;
+	
+	public float fadeOutSpeed;
+	
 	private UICamera uiCamera;
 	private UISprite reticle;
 	private Vector2 reticleScreenCoordinates;
@@ -52,17 +57,17 @@ public class CursorController : Singleton<CursorController>
 	
 	public void Show()
 	{
-		reticle.transform.localScale = Vector3.one * 1.5f;
+		ResetCursor();
+		reticle.gameObject.SetActive(true);
+		
+		reticle.transform.localScale = Vector3.one * fadeInSize;
 		reticle.alpha = 0.0f;
 		
-		UITweener scaleTween = TweenScale.Begin(reticle.gameObject, 0.2f, Vector3.one);
+		UITweener scaleTween = TweenScale.Begin(reticle.gameObject, fadeInSpeed, Vector3.one);
 		scaleTween.method = UITweener.Method.EaseInOut;
 		
-		UITweener alphaTween = TweenAlpha.Begin(reticle.gameObject, 0.2f, 1.0f);
-		alphaTween.method = UITweener.Method.EaseInOut;
-		
-		
-		reticle.enabled = true;
+		UITweener alphaTween = TweenAlpha.Begin(reticle.gameObject, fadeInSpeed, 1.0f);
+		alphaTween.method = UITweener.Method.EaseInOut;		
 	}
 	
 	public void Hide()
@@ -70,14 +75,13 @@ public class CursorController : Singleton<CursorController>
 		reticle.transform.localScale = Vector3.one;
 		reticle.alpha = 1.0f;
 		
-		UITweener scaleTween = TweenScale.Begin(reticle.gameObject, 0.2f, Vector3.zero);
+		UITweener scaleTween = TweenScale.Begin(reticle.gameObject, fadeOutSpeed, Vector3.zero);
 		scaleTween.method = UITweener.Method.EaseInOut;
 		
-		UITweener alphaTween = TweenAlpha.Begin(reticle.gameObject, 0.2f, 0.0f);
+		UITweener alphaTween = TweenAlpha.Begin(reticle.gameObject, fadeOutSpeed, 0.0f);
 		alphaTween.method = UITweener.Method.EaseInOut;
-		
-		
-		reticle.enabled = false;
+
+		reticle.gameObject.SetActive(false, fadeOutSpeed);
 	}
 	
 	public void ResetCursor()
