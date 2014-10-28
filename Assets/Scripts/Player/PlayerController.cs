@@ -20,6 +20,17 @@ public class PlayerController : Singleton<PlayerController> {
 		
 	[Tooltip("All movement-related parameters are nested here.")]
 	public MovementParameters movement;
+
+	/*CHARLES*/
+	[Tooltip("All Lane-Movement related parameters are nested here.")]
+	public LaneParameters lane;
+	private float leftStickYMovedDuration = 0f;
+	private float leftStickMovedDuration = 0f;
+	private Direction startedSwipeDirection = Direction.None;
+	private Direction leftStickSwipeDirection = Direction.None;
+	private bool leftStickHasBeenReleased = true;
+	private bool leftStickYHasBeenReleased = true;
+	/*CHARLES*/
 	
 	private bool jumpWasReleased = false;
 	private bool _falling = false;
@@ -75,7 +86,7 @@ public class PlayerController : Singleton<PlayerController> {
 	private float timeMovingRight = 0;
 	private bool interruptJump = false;
 
-	
+
 	private void Start()
 	{
 		characterController = GetComponent<CharacterController>();
@@ -104,9 +115,14 @@ public class PlayerController : Singleton<PlayerController> {
 		{
 			PlayerController.Instance.StickToGround();
 			PlayerController.Instance.UpdateMovement();
+			/*CHARLES START*/
+			PlayerController.Instance.UpdateLaneChangeMovement();
+			/*CHARLES END*/
 			PlayerController.Instance.UpdateGravity();
 			PlayerController.Instance.ApplyMovementDeceleration();
 			PlayerController.Instance.MoveCharacter();
+
+
 		}
 		
 		public override void LateUpdateState(GameObject go)
@@ -138,6 +154,9 @@ public class PlayerController : Singleton<PlayerController> {
 		{
 			PlayerController.Instance.StickToGround();
 			PlayerController.Instance.UpdateMovement();
+			/*CHARLES START*/
+			PlayerController.Instance.UpdateLaneChangeMovement();
+			/*CHARLES END*/
 			PlayerController.Instance.UpdateGravity();
 			PlayerController.Instance.ApplyMovementDeceleration();
 			PlayerController.Instance.MoveCharacter();
@@ -190,6 +209,11 @@ public class PlayerController : Singleton<PlayerController> {
 		{
 			PlayerController.Instance.UpdateJumpMovement();
 			PlayerController.Instance.UpdateMovement();
+
+			/*CHARLES START*/
+			PlayerController.Instance.UpdateLaneChangeMovement();
+			/*CHARLES END*/
+
 			PlayerController.Instance.ApplyAirControlFactor();
 			PlayerController.Instance.ApplyMovementDeceleration();
 			PlayerController.Instance.MoveCharacter();
@@ -219,6 +243,11 @@ public class PlayerController : Singleton<PlayerController> {
 		{
 			PlayerController.Instance.StickToGround();
 			PlayerController.Instance.UpdateMovement();
+
+			/*CHARLES START*/
+			PlayerController.Instance.UpdateLaneChangeMovement();
+			/*CHARLES END*/
+
 			PlayerController.Instance.ApplyAirControlFactor();
 			PlayerController.Instance.UpdateGravity();
 			PlayerController.Instance.ApplyMovementDeceleration();
@@ -317,6 +346,10 @@ public class PlayerController : Singleton<PlayerController> {
 		fallingSpeedMultiplier = movement.fallingAcceleration.Evaluate(timeInAir);
 		risingSpeedMultiplier = movement.riseAcceleration.Evaluate(GetCurrentHeightJumpedRatio());
 		horizontalSpeedMultiplier = movement.horizontalAcceleration.Evaluate(moveTime);
+
+		/*CHARLES*/
+		CheckChangeLane();
+		/*CHARLES*/
 	}
 	
 	public void SetJumpDirection(Direction newJumpDirection)
@@ -335,12 +368,190 @@ public class PlayerController : Singleton<PlayerController> {
 		
 		return movementRequested;
 	}
-	
+
+	/*CHARLES START*/
+	private void CheckChangeLane()
+	{
+		// Check left stick swipe
+		Vector2 currentLeftStickValue = InputController.Instance.LeftStick();
+		//lane.changeLaneRequested = false;
+
+		if(currentLeftStickValue != Vector2.zero)
+		{
+			leftStickMovedDuration += GameController.DeltaTime();
+
+			if(Mathf.Abs(currentLeftStickValue.y) > 0.4f)
+			{
+				leftStickYMovedDuration += GameController.DeltaTime();
+			}
+			else
+			{
+				leftStickYMovedDuration = 0f;
+				leftStickYHasBeenReleased = true;
+			}
+
+			if((leftStickSwipeDirection == PlayerController.Direction.None) && (Mathf.Abs(currentLeftStickValue.y) > 0.4f))
+			{
+				startedSwipeDirection = (currentLeftStickValue.y > 0 ? PlayerController.Direction.Up : PlayerController.Direction.Down);
+			}
+
+			leftStickSwipeDirection = PlayerController.Direction.None;
+
+
+			if(leftStickYMovedDuration < 0.5f && leftStickYMovedDuration > 0.05f && (Mathf.Abs(currentLeftStickValue.y) > 0.4f) && leftStickYHasBeenReleased)
+			{
+				if(startedSwipeDirection != PlayerController.Direction.None)
+				{
+					leftStickSwipeDirection = startedSwipeDirection;
+					startedSwipeDirection = Direction.None;
+					leftStickYHasBeenReleased = false;
+					leftStickYMovedDuration = 0f;
+				}
+			}
+		}
+		else
+		{
+			
+			leftStickYMovedDuration = 0;
+			leftStickMovedDuration = 0f;
+			leftStickSwipeDirection = Direction.None;
+			startedSwipeDirection = PlayerController.Direction.None;
+			leftStickHasBeenReleased = true;
+			leftStickYHasBeenReleased = true;
+		}
+
+
+		Direction newChangeLaneDrection = lane.laneChangeDirection;
+		PlayerController.Lane newTargetLane = lane.targetLane;
+
+		if(!lane.changeLaneRequested)
+		{
+			//lane.changeLaneOnceAgain = false;
+			// If change lane requested
+			if((leftStickSwipeDirection == Direction.Up || leftStickSwipeDirection == Direction.Down) || (lane.forceLaneChange && lane.forceLaneChangeDirection != Direction.None))
+			{
+				newTargetLane = GetLane((lane.forceLaneChange ? lane.forceLaneChangeDirection : leftStickSwipeDirection));
+
+
+				if(newTargetLane != lane.currentLane && newTargetLane != Lane.None)
+				{
+					lane.changeLaneRequested = true;
+					lane.laneChangeDirection = (lane.forceLaneChange ? lane.forceLaneChangeDirection : leftStickSwipeDirection);
+
+					lane.targetLane = newTargetLane;
+					lane.zAtSwitchStart = transform.position.z;
+
+					//Direction directionToCheck = lane.laneChangeDirection;
+
+
+					lane.targetZ = transform.position.z + (lane.laneChangeDirection == Direction.Up ? lane.zOffsetValue : -lane.zOffsetValue);
+				}
+
+				lane.forceLaneChange = false;
+
+				leftStickSwipeDirection = Direction.None;
+				startedSwipeDirection = Direction.None;
+			}
+		}
+		else
+		{
+			if(leftStickSwipeDirection != Direction.None)
+			{
+				lane.changeLaneOnceAgain = true;
+				lane.forceLaneChangeDirection = leftStickSwipeDirection;
+			}
+		}
+		
+
+	}
+
+	public Lane GetLane(Direction relativeDirection)
+	{
+		Lane laneToReturn = lane.currentLane;
+
+		switch(laneToReturn)
+		{
+
+		case Lane.Back:
+			if(relativeDirection == Direction.Down)
+			{
+				laneToReturn = Lane.Center;
+			}
+			break;
+
+		case Lane.Center:
+			if(relativeDirection == Direction.Up)
+			{
+				laneToReturn = Lane.Back;
+			}
+			else if(relativeDirection == Direction.Down)
+			{
+				laneToReturn = Lane.Front;
+			}
+			break;
+
+		case Lane.Front:
+			if(relativeDirection == Direction.Up)
+			{
+				laneToReturn = Lane.Center;
+			}
+			break;
+		default:
+			laneToReturn = Lane.None;
+			break;
+		}
+
+		return laneToReturn;
+	}
+
+	/*CHARLES END*/
+
+	public void UpdateLaneChangeMovement()
+	{
+		if(lane.changeLaneRequested)
+		{
+			float zSpeed = lane.zSpeed;
+
+			if(Vector3.Distance(transform.position, new Vector3(transform.position.x, transform.position.y, lane.targetZ)) > 0.1f)
+			{
+				zSpeed *= ((lane.laneChangeDirection == Direction.Up ? 1 : -1) * GameController.DeltaTime());
+				movementVector += new Vector3(0,0, zSpeed);
+			}
+			else
+			{
+				/*if(lane.targetLane != lane.currentLane)
+				{*/
+					ArrivedAtNewLane();
+				//}
+			}
+		}
+	}
+
+	public void ArrivedAtNewLane()
+	{
+		lane.currentLane = lane.targetLane;
+
+		lane.changeLaneRequested = false;
+
+		if(lane.changeLaneOnceAgain)
+		{
+			lane.forceLaneChange = true;
+			lane.changeLaneOnceAgain = false;
+
+			//lane.laneChangeDirection = Direction.None;
+		}
+		else
+		{
+			lane.targetLane = Lane.None;
+			lane.laneChangeDirection = Direction.None;
+		}
+	}
+
 	private float GetCurrentHeightJumpedRatio()
 	{
 		return (currentHeightJumped / movement.jumpHeight);
 	}
-	
+
 	public bool JumpRequested()
 	{
 		bool jumpRequested = false;
@@ -562,14 +773,11 @@ public class PlayerController : Singleton<PlayerController> {
 	
 	public void ApplyAirControlFactor()
 	{
-		//if(PlayerController.Instance.jumpDirection == Direction.None ||
-		//   PlayerController.Instance.horizontalDirection != PlayerController.Instance.jumpDirection)
-		{
-			movementVector = new Vector3 (
-				movementVector.x * movement.airControlFactor,
-				movementVector.y,
-				movementVector.z * movement.airControlFactor);
-		}
+		movementVector = new Vector3 (
+			movementVector.x * movement.airControlFactor,
+			movementVector.y,
+			movementVector.z * movement.airControlFactor);
+
 	}
 	
 	public void ApplyMovementDeceleration()
@@ -655,15 +863,9 @@ public class PlayerController : Singleton<PlayerController> {
 		public float horizontalSpeed;
 		[Tooltip("Acceleration from zero to Horizontal Speed")]
 		public AnimationCurve horizontalAcceleration;
-		
-		//[Tooltip("Horizontal Deceleration while on the ground")]
-		//public AnimationCurve horizontalGroundDeceleration;
-		
+
 		public float horizontalGroundStopSpeed;
 		public float horizontalAirStopSpeed;
-		
-		//[Tooltip("Horizontal Deceleration while in the air")]
-		//public AnimationCurve horizontalAirDeceleration;
 		
 		[Tooltip("Maximum falling speed\nCan be considered as 'gravity speed'")]
 		public float fallingSpeed;
@@ -694,6 +896,42 @@ public class PlayerController : Singleton<PlayerController> {
 		public Vector3 position;
 		
 	}
+
+	/*CHARLES*/
+	[System.Serializable]
+	public class LaneParameters
+	{
+		[HideInInspector]
+		public Lane currentLane = Lane.Center;
+		public float zOffsetValue = 5;
+		public float zSpeed = 2;
+		[HideInInspector]
+		public PlayerController.Direction laneChangeDirection = PlayerController.Direction.None;
+		[HideInInspector]
+		public PlayerController.Lane targetLane = PlayerController.Lane.None;
+		[HideInInspector]
+		public bool changeLaneRequested = false;
+		[HideInInspector]
+		public float zAtSwitchStart = 0f;
+		[HideInInspector]
+		public float targetZ = 0f;
+		[HideInInspector]
+		public bool changeLaneOnceAgain = false;
+		[HideInInspector]
+		public bool forceLaneChange = false;
+		[HideInInspector]
+		public PlayerController.Direction forceLaneChangeDirection = PlayerController.Direction.None;
+	}
+
+	public enum Lane
+	{
+		None,
+		Front,
+		Center,
+		Back
+	}
+
+	/*CHARLES*/
 	
 	public enum Direction
 	{

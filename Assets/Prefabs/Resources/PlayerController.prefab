@@ -172,6 +172,18 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
     airControlFactor: .75
+  lane:
+    currentLane: 2
+    zOffsetValue: 2
+    zSpeed: 10
+    laneChangeDirection: 0
+    targetLane: 0
+    changeLaneRequested: 0
+    zAtSwitchStart: 0
+    targetZ: 0
+    changeLaneOnceAgain: 0
+    forceLaneChange: 0
+    forceLaneChangeDirection: 0
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1
