@@ -4,9 +4,15 @@ using System.Collections;
 public class GameController : Singleton<GameController> {
 
 	private float deltaTime = 0;
+	private bool isPaused = false;
 
 	private PlayerController playerController;
 	private CameraController cameraController;
+
+	public static bool IsPaused()
+	{
+		return GameController.Instance.isPaused;
+	}
 
 	public static float DeltaTime()
 	{
