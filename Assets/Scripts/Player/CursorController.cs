@@ -35,7 +35,7 @@ public class CursorController : Singleton<CursorController>
 		moveTime = 0.0f;
 		idleTime = 0.0f;
 		
-		Hide();
+		reticle.gameObject.SetActive(false);
 	}
 	
 	// Update is called once per frame

@@ -35,9 +35,9 @@ public class InputController : Singleton<InputController> {
 	public InputDevice activeDevice;
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
 	
-		Application.targetFrameRate = -1;
+		//Application.targetFrameRate = -1;
 		InputManager.Setup();
 
 		InputManager.OnDeviceAttached += (InputDevice obj) => OnNewDeviceAttached(obj);
@@ -197,7 +197,6 @@ public class InputController : Singleton<InputController> {
 	public InputControl GetControl(InputControlType type)
 	{
 		return activeDevice.GetControl(type);
-	
 	}
 	
 	[System.Serializable]

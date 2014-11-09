@@ -56,6 +56,30 @@ namespace CustomProfileKeyboardMouse
 					Target = InputControlType.Action2,
 					Source = KeyCodeButton( KeyCode.E )
 				},
+				new InputControlMapping
+				{
+					Handle = "Switch Left",
+					Target = InputControlType.DPadLeft,
+					Source = KeyCodeButton( KeyCode.Alpha1 )
+				},
+				new InputControlMapping
+				{
+					Handle = "Switch Right",
+					Target = InputControlType.DPadRight,
+					Source = KeyCodeButton( KeyCode.Alpha2 )
+				},
+				new InputControlMapping
+				{
+					Handle = "Switch Up",
+					Target = InputControlType.DPadUp,
+					Source = KeyCodeButton( KeyCode.Alpha3 )
+				},
+				new InputControlMapping
+				{
+					Handle = "Switch Down",
+					Target = InputControlType.DPadDown,
+					Source = KeyCodeButton( KeyCode.Alpha4 )
+				},
 			};
 			
 			AnalogMappings = new[]

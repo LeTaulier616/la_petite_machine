@@ -12,26 +12,25 @@ public class PlayerController : Singleton<PlayerController> {
 	
 	[HideInInspector]
 	public LayerMask defaultLayer;
-	
-	private bool isMoving = false;
-	private bool isAiming = false;
-	
+		
 	[Tooltip("All spawn-related parameters are nested here.")]
 	public SpawnParameters spawn;
 		
 	[Tooltip("All movement-related parameters are nested here.")]
 	public MovementParameters movement;
 
-	/*CHARLES*/
 	[Tooltip("All Lane-Movement related parameters are nested here.")]
 	public LaneParameters lane;
+	
+	private bool isMoving = false;
+	private bool isAiming = false;
+	
 	private float leftStickYMovedDuration = 0f;
 	private float leftStickMovedDuration = 0f;
 	private Direction startedSwipeDirection = Direction.None;
 	private Direction leftStickSwipeDirection = Direction.None;
 	private bool leftStickHasBeenReleased = true;
 	private bool leftStickYHasBeenReleased = true;
-	/*CHARLES*/
 	
 	private bool jumpWasReleased = false;
 	private bool _falling = false;
@@ -67,29 +66,34 @@ public class PlayerController : Singleton<PlayerController> {
 	private bool stickToTheGround = false;
 	
 	private Vector2 leftStick;
-	private float leftTrigger; //Michel
-	private float rightTrigger; //Michel
+	private float leftTrigger; 
+	private float rightTrigger;
 	
-	private StateMachine stateMachine;
+	[HideInInspector]
+	public StateMachine stateMachine;
 	public IdleState idle;
 	public MoveState moving;
 	public JumpState jumping;
 	public FallState falling;
-	public AimState aiming; //Michel
+	public AimState aiming;
 	
 	private bool canMove;
 	private bool canJump;
 	
-	private Direction horizontalDirection;
-	private Direction previousHorizontalDirection;
-	private Direction jumpDirection;
+	[HideInInspector]
+	public Direction horizontalDirection;
+	[HideInInspector]
+	public Direction previousHorizontalDirection;
+	[HideInInspector]
+	public Direction jumpDirection;
 	
 	private Vector2 previousFrameLeftStick;
 	private Vector2 leftStickDelta;
 
 	private float timeMovingLeft = 0;
 	private float timeMovingRight = 0;
-	private bool interruptJump = false;
+	[HideInInspector]
+	public bool interruptJump = false;
 
 
 	private void Start()
@@ -102,7 +106,7 @@ public class PlayerController : Singleton<PlayerController> {
 		moving = new MoveState();
 		jumping = new JumpState();
 		falling = new FallState();
-		aiming = new AimState(); // Michel
+		aiming = new AimState();
 				
 		stateMachine.SetState(idle);
 
@@ -111,220 +115,7 @@ public class PlayerController : Singleton<PlayerController> {
 		CameraController.Instance.CanLook(true);
 	}
 	
-	public class IdleState : State
-	{
-		public override void EnterState(GameObject go)
-		{
-			PlayerController.Instance.CanJump(true);
-			CameraController.Instance.CanLook(true);
-		}
-		
-		public override void UpdateState(GameObject go)
-		{
-			PlayerController.Instance.StickToGround();
-			PlayerController.Instance.UpdateMovement();
-			/*CHARLES START*/
-			PlayerController.Instance.UpdateLaneChangeMovement();
-			/*CHARLES END*/
-			PlayerController.Instance.UpdateGravity();
-			PlayerController.Instance.ApplyMovementDeceleration();
-			PlayerController.Instance.MoveCharacter();
 
-
-		}
-		
-		public override void LateUpdateState(GameObject go)
-		{
-			// Idle to move state handling
-			if(PlayerController.Instance.MovementRequested() && PlayerController.Instance.CanMove())
-				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.moving);
-			
-			// Idle to jump state handling
-			if(PlayerController.Instance.JumpRequested() && PlayerController.Instance.CanJump())
-				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.jumping);
-				
-			//MICHEL //Idle to aim state handling
-			if(PlayerController.Instance.AimRequested() && PlayerController.Instance.CanAim())
-				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.aiming);
-		}
-		
-		public override void ExitState(GameObject go)
-		{
-			
-		}
-	}
-	
-	
-	public class MoveState : State
-	{
-		public override void EnterState(GameObject go)
-		{
-			PlayerController.Instance.CanJump(true);
-			CameraController.Instance.CanLook(true);
-		}
-		
-		public override void UpdateState(GameObject go)
-		{
-			PlayerController.Instance.StickToGround();
-			PlayerController.Instance.UpdateMovement();
-			/*CHARLES START*/
-			PlayerController.Instance.UpdateLaneChangeMovement();
-			/*CHARLES END*/
-			PlayerController.Instance.UpdateGravity();
-			PlayerController.Instance.ApplyMovementDeceleration();
-			PlayerController.Instance.MoveCharacter();
-		}
-		
-		public override void LateUpdateState(GameObject go)
-		{
-			// Move to idle state handling
-			if(!PlayerController.Instance.MovementRequested() || !PlayerController.Instance.CanMove())
-			{
-				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.idle);
-			}
-			
-			// Move to jump state handling
-			if(PlayerController.Instance.JumpRequested() && PlayerController.Instance.CanJump())
-			{
-				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.jumping);
-			}
-			
-			//MICHEL //Idle to aim state handling
-			if(PlayerController.Instance.AimRequested())
-				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.aiming);
-				
-			// Move to fall state handling
-			if(PlayerController.Instance.IsFalling())
-			{
-				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.falling);
-			}
-		}
-		
-		public override void ExitState(GameObject go)
-		{
-			
-		}
-	}
-	
-	public class JumpState : State
-	{
-		public override void EnterState(GameObject go)
-		{
-			PlayerController.Instance.interruptJump = false;
-			PlayerController.Instance.ResetJumpValues();
-			
-			// If player jumps while Idle, no jump direciton must be set
-			PlayerController.Direction newJumpDir = PlayerController.Instance.horizontalDirection;
-			if(PlayerController.Instance.stateMachine.previousState == PlayerController.Instance.idle)
-				newJumpDir = Direction.None;
-			
-			PlayerController.Instance.SetJumpDirection(newJumpDir);
-			PlayerController.Instance.CanJump(false);
-		}
-		
-		public override void UpdateState(GameObject go)
-		{
-			PlayerController.Instance.UpdateJumpMovement();
-			PlayerController.Instance.UpdateMovement();
-
-			/*CHARLES START*/
-			PlayerController.Instance.UpdateLaneChangeMovement();
-			/*CHARLES END*/
-
-			PlayerController.Instance.ApplyAirControlFactor();
-			PlayerController.Instance.ApplyMovementDeceleration();
-			PlayerController.Instance.MoveCharacter();
-		}
-		
-		public override void LateUpdateState(GameObject go)
-		{
-			if(PlayerController.Instance.JumpHeightReached() || PlayerController.Instance.interruptJump)
-				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.falling);
-			
-		}
-		
-		public override void ExitState(GameObject go)
-		{
-			PlayerController.Instance.ResetJumpValues();
-		}
-	}
-	
-	public class FallState : State
-	{
-		public override void EnterState(GameObject go)
-		{
-			PlayerController.Instance.CanJump(false);
-		}
-		
-		public override void UpdateState(GameObject go)
-		{
-			PlayerController.Instance.StickToGround();
-			PlayerController.Instance.UpdateMovement();
-
-			/*CHARLES START*/
-			PlayerController.Instance.UpdateLaneChangeMovement();
-			/*CHARLES END*/
-
-			PlayerController.Instance.ApplyAirControlFactor();
-			PlayerController.Instance.UpdateGravity();
-			PlayerController.Instance.ApplyMovementDeceleration();
-			PlayerController.Instance.MoveCharacter();
-		}
-		
-		public override void LateUpdateState(GameObject go)
-		{
-			if(PlayerController.Instance.IsGrounded())
-			{
-				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.moving);
-			}
-		}
-		
-		public override void ExitState(GameObject go)
-		{
-			
-		}
-	}
-	
-	/*MICHEL*/
-	public class AimState : State
-	{
-		public override void EnterState(GameObject go)
-		{
-		 	PlayerController.Instance.CanJump(false);
-		 	PlayerController.Instance.CanMove(false);
-		 	CameraController.Instance.CanLook(false);
-		 	CursorController.Instance.Show();
-		}
-		 
-		public override void UpdateState(GameObject go)
-		{
-		 	PlayerController.Instance.UpdateGravity();
-		 	
-		 	if(!PlayerController.Instance.AimRequested())
-		 	{
-				PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.idle);
-		 	}
-		 	
-		 	if(PlayerController.Instance.ShootRequested())
-		 	{
-		 	
-		 	}
-
-			PlayerController.Instance.MoveCharacter();
-		}
-		 
-		public override void LateUpdateState(GameObject go)
-		{
-		 
-		}
-		 
-		public override void ExitState(GameObject go)
-		{
-		 	CursorController.Instance.Hide();
-		}
-	}
-	/*MICHEL*/
-	
 	private void Update()
 	{
 		UpdateEarlyVariables();
@@ -335,8 +126,8 @@ public class PlayerController : Singleton<PlayerController> {
 	{
 		leftStickDelta = new Vector2(Mathf.Abs(InputController.Instance.LeftStick().x) - Mathf.Abs(leftStick.x), Mathf.Abs(InputController.Instance.LeftStick().y) - Mathf.Abs(leftStick.y));
 		leftStick = InputController.Instance.LeftStick();
-		leftTrigger = InputController.Instance.LeftTrigger(); //Michel
-		rightTrigger = InputController.Instance.RightTrigger(); //Michel
+		leftTrigger = InputController.Instance.LeftTrigger();
+		rightTrigger = InputController.Instance.RightTrigger();
 		movementVector = Vector3.zero;
 		currentPosition = transform.position;
 		deltaPosition = currentPosition - previousFramePosition;
@@ -406,9 +197,7 @@ public class PlayerController : Singleton<PlayerController> {
 		risingSpeedMultiplier = movement.riseAcceleration.Evaluate(GetCurrentHeightJumpedRatio());
 		horizontalSpeedMultiplier = movement.horizontalAcceleration.Evaluate(moveTime);
 
-		/*CHARLES*/
 		CheckChangeLane();
-		/*CHARLES*/
 	}
 	
 	public void SetJumpDirection(Direction newJumpDirection)
@@ -428,7 +217,6 @@ public class PlayerController : Singleton<PlayerController> {
 		return movementRequested;
 	}
 
-	/*CHARLES START*/
 	private void CheckChangeLane()
 	{
 		// Check left stick swipe
@@ -563,7 +351,6 @@ public class PlayerController : Singleton<PlayerController> {
 		return laneToReturn;
 	}
 
-	/*CHARLES END*/
 
 	public void UpdateLaneChangeMovement()
 	{
@@ -624,7 +411,6 @@ public class PlayerController : Singleton<PlayerController> {
 		return jumpRequested;
 	}
 	
-	/*MICHEL*/
 	public bool AimRequested()
 	{
 		bool aimRequested = false;
@@ -644,9 +430,7 @@ public class PlayerController : Singleton<PlayerController> {
 		
 		return aimRequested;
 	}
-	/*MICHEL*/
-	
-	/*MICHEL*/
+
 	public bool ShootRequested()
 	{
 		bool shootRequested = false;
@@ -666,7 +450,6 @@ public class PlayerController : Singleton<PlayerController> {
 		
 		return shootRequested;
 	}
-	/*MICHEL*/
 	
 	public bool CanMove()
 	{
@@ -720,7 +503,7 @@ public class PlayerController : Singleton<PlayerController> {
 		
 	}
 	
-	private void MoveCharacter()
+	public void MoveCharacter()
 	{
 
 		characterController.Move(movementVector);
@@ -1014,7 +797,6 @@ public class PlayerController : Singleton<PlayerController> {
 		
 	}
 
-	/*CHARLES*/
 	[System.Serializable]
 	public class LaneParameters
 	{
@@ -1048,7 +830,6 @@ public class PlayerController : Singleton<PlayerController> {
 		Back
 	}
 
-	/*CHARLES*/
 	
 	public enum Direction
 	{
@@ -1060,3 +841,208 @@ public class PlayerController : Singleton<PlayerController> {
 		Down
 	}
 }
+
+public class IdleState : State
+{
+	public override void EnterState(GameObject go)
+	{
+		PlayerController.Instance.CanJump(true);
+		CameraController.Instance.CanLook(true);
+	}
+	
+	public override void UpdateState(GameObject go)
+	{
+		PlayerController.Instance.StickToGround();
+		PlayerController.Instance.UpdateMovement();
+		PlayerController.Instance.UpdateLaneChangeMovement();
+		PlayerController.Instance.UpdateGravity();
+		PlayerController.Instance.ApplyMovementDeceleration();
+		PlayerController.Instance.MoveCharacter();
+		
+		
+	}
+	
+	public override void LateUpdateState(GameObject go)
+	{
+		// Idle to move state handling
+		if(PlayerController.Instance.MovementRequested() && PlayerController.Instance.CanMove())
+			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.moving);
+		
+		// Idle to jump state handling
+		if(PlayerController.Instance.JumpRequested() && PlayerController.Instance.CanJump())
+			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.jumping);
+		
+		//Idle to aim state handling
+		if(PlayerController.Instance.AimRequested() && PlayerController.Instance.CanAim())
+			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.aiming);
+	}
+	
+	public override void ExitState(GameObject go)
+	{
+		
+	}
+}
+
+
+public class MoveState : State
+{
+	public override void EnterState(GameObject go)
+	{
+		PlayerController.Instance.CanJump(true);
+		CameraController.Instance.CanLook(true);
+	}
+	
+	public override void UpdateState(GameObject go)
+	{
+		PlayerController.Instance.StickToGround();
+		PlayerController.Instance.UpdateMovement();
+		PlayerController.Instance.UpdateLaneChangeMovement();
+		PlayerController.Instance.UpdateGravity();
+		PlayerController.Instance.ApplyMovementDeceleration();
+		PlayerController.Instance.MoveCharacter();
+	}
+	
+	public override void LateUpdateState(GameObject go)
+	{
+		// Move to idle state handling
+		if(!PlayerController.Instance.MovementRequested() || !PlayerController.Instance.CanMove())
+		{
+			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.idle);
+		}
+		
+		// Move to jump state handling
+		if(PlayerController.Instance.JumpRequested() && PlayerController.Instance.CanJump())
+		{
+			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.jumping);
+		}
+		
+		//Idle to aim state handling
+		if(PlayerController.Instance.AimRequested())
+			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.aiming);
+		
+		// Move to fall state handling
+		if(PlayerController.Instance.IsFalling())
+		{
+			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.falling);
+		}
+	}
+	
+	public override void ExitState(GameObject go)
+	{
+		
+	}
+}
+
+public class JumpState : State
+{
+	public override void EnterState(GameObject go)
+	{
+		PlayerController.Instance.interruptJump = false;
+		PlayerController.Instance.ResetJumpValues();
+		
+		// If player jumps while Idle, no jump direciton must be set
+		PlayerController.Direction newJumpDir = PlayerController.Instance.horizontalDirection;
+		if(PlayerController.Instance.stateMachine.previousState == PlayerController.Instance.idle)
+			newJumpDir = PlayerController.Direction.None;
+		
+		PlayerController.Instance.SetJumpDirection(newJumpDir);
+		PlayerController.Instance.CanJump(false);
+	}
+	
+	public override void UpdateState(GameObject go)
+	{
+		PlayerController.Instance.UpdateJumpMovement();
+		PlayerController.Instance.UpdateMovement();
+		
+		PlayerController.Instance.UpdateLaneChangeMovement();
+		
+		PlayerController.Instance.ApplyAirControlFactor();
+		PlayerController.Instance.ApplyMovementDeceleration();
+		PlayerController.Instance.MoveCharacter();
+	}
+	
+	public override void LateUpdateState(GameObject go)
+	{
+		if(PlayerController.Instance.JumpHeightReached() || PlayerController.Instance.interruptJump)
+			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.falling);
+		
+	}
+	
+	public override void ExitState(GameObject go)
+	{
+		PlayerController.Instance.ResetJumpValues();
+	}
+}
+
+public class FallState : State
+{
+	public override void EnterState(GameObject go)
+	{
+		PlayerController.Instance.CanJump(false);
+	}
+	
+	public override void UpdateState(GameObject go)
+	{
+		PlayerController.Instance.StickToGround();
+		PlayerController.Instance.UpdateMovement();
+		
+		PlayerController.Instance.UpdateLaneChangeMovement();
+		
+		PlayerController.Instance.ApplyAirControlFactor();
+		PlayerController.Instance.UpdateGravity();
+		PlayerController.Instance.ApplyMovementDeceleration();
+		PlayerController.Instance.MoveCharacter();
+	}
+	
+	public override void LateUpdateState(GameObject go)
+	{
+		if(PlayerController.Instance.IsGrounded())
+		{
+			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.moving);
+		}
+	}
+	
+	public override void ExitState(GameObject go)
+	{
+		
+	}
+}
+
+public class AimState : State
+{
+	public override void EnterState(GameObject go)
+	{
+		PlayerController.Instance.CanJump(false);
+		PlayerController.Instance.CanMove(false);
+		CameraController.Instance.CanLook(false);
+		CursorController.Instance.Show();
+	}
+	
+	public override void UpdateState(GameObject go)
+	{
+		PlayerController.Instance.UpdateGravity();
+		
+		if(!PlayerController.Instance.AimRequested())
+		{
+			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.idle);
+		}
+		
+		if(PlayerController.Instance.ShootRequested())
+		{
+			
+		}
+		
+		PlayerController.Instance.MoveCharacter();
+	}
+	
+	public override void LateUpdateState(GameObject go)
+	{
+		
+	}
+	
+	public override void ExitState(GameObject go)
+	{
+		CursorController.Instance.Hide();
+	}
+}
+

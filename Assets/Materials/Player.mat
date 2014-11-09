@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: Player
-  m_Shader: {fileID: 7, guid: 0000000000000000f000000000000000, type: 0}
+  m_Shader: {fileID: 4800000, guid: a812fca42b7a60744956dcec1292da1f, type: 3}
   m_ShaderKeywords: []
   m_CustomRenderQueue: -1
   m_SavedProperties:
@@ -34,3 +34,7 @@ Material:
         first:
           name: _SpecColor
         second: {r: .5, g: .5, b: .5, a: 1}
+      data:
+        first:
+          name: _OccludeColor
+        second: {r: 0, g: 0, b: 0, a: 1}
