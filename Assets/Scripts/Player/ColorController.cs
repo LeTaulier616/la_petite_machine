@@ -106,26 +106,28 @@ public class ColorController : Singleton<ColorController>
 		{
 			case ColorChoice.None:
 			switchTexture(null);
-			
+			GameController.Instance.ShowObjects(ColoredObjectScript.ColorChoice.None);
 			break;
 			
 			case ColorChoice.Left:
 			switchTexture(colorParameters.leftTexture);
+			GameController.Instance.HideObjects(ColoredObjectScript.ColorChoice.Left);
 			break;
 			
 			case ColorChoice.Right:
 			switchTexture(colorParameters.rightTexture);
+			GameController.Instance.HideObjects(ColoredObjectScript.ColorChoice.Right);
 			
 			break;
 			
 			case ColorChoice.Up:
 			switchTexture(colorParameters.upTexture);
-			
+			GameController.Instance.HideObjects(ColoredObjectScript.ColorChoice.Up);
 			break;
 			
 			case ColorChoice.Down:
 			switchTexture(colorParameters.downTexture);
-			
+			GameController.Instance.HideObjects(ColoredObjectScript.ColorChoice.Down);
 			break;
 		}
 	}

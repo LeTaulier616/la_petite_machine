@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 public class GameController : Singleton<GameController> {
 
@@ -8,6 +10,9 @@ public class GameController : Singleton<GameController> {
 
 	private PlayerController playerController;
 	private CameraController cameraController;
+	
+	[HideInInspector]
+	public List<ColoredObjectScript> coloredObjectList;
 
 	public static bool IsPaused()
 	{
@@ -24,15 +29,17 @@ public class GameController : Singleton<GameController> {
 		deltaTime = Time.deltaTime;
 	}
 	
-	private void Start () {
-
+	private void Start () 
+	{
 		StartCoroutine("StartLevelRoutine");
-
+		
+		coloredObjectList = new List<ColoredObjectScript>();
+		coloredObjectList = GetAllColoredObjects();
+		
 	}
 
 	private IEnumerator StartLevelRoutine()
 	{
-
 		yield return new WaitForSeconds(0.1f);
 		SpawnPlayer();
 		yield return new WaitForSeconds(0.1f);
@@ -56,5 +63,53 @@ public class GameController : Singleton<GameController> {
 			cameraController.ResetToFollowPlayer();
 		}
 	}
-
+	
+	private List<ColoredObjectScript> GetAllColoredObjects()
+	{
+		ColoredObjectScript[] coloredObjectsArray;
+		GameObject coloredObjectsParent;
+		
+		coloredObjectsParent = GameObject.Find("Objects");
+		
+		coloredObjectsArray = coloredObjectsParent.GetComponentsInChildren<ColoredObjectScript>();
+		
+		return coloredObjectsArray.ToList();
+	}
+	
+	public void ShowObjects(ColoredObjectScript.ColorChoice choice)
+	{
+		foreach(ColoredObjectScript obj in coloredObjectList)
+		{
+			if(choice == ColoredObjectScript.ColorChoice.None)
+			{
+				obj.Show();
+			}
+			
+			else if(obj.currentColor == choice)
+			{
+				obj.Show();
+			}
+			
+			else
+			{
+				obj.Hide();
+			}
+		}
+	}
+	
+	public void HideObjects(ColoredObjectScript.ColorChoice choice)
+	{
+		foreach(ColoredObjectScript obj in coloredObjectList)
+		{
+			if(obj.currentColor == choice)
+			{
+				obj.Hide();
+			}
+			
+			else
+			{
+				obj.Show();
+			}
+		}
+	}
 }
