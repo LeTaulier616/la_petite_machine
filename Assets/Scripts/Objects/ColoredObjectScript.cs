@@ -14,11 +14,13 @@ public class ColoredObjectScript : MonoBehaviour
 	
 	[SerializeField]
 	public ColorChoice currentColor;
-	
+
 	[SerializeField]
 	private ColorChoice previousColor;
 	
 	[SerializeField]
+	public bool isStatic;
+	
 	private pb_Object obj;
 	
 	private bool canChangeColor;
@@ -31,6 +33,9 @@ public class ColoredObjectScript : MonoBehaviour
 		previousColor = ColorChoice.None;
 		
 		updateLayer("ColorMask");
+		
+		if(rigidbody != null && !isStatic)
+			rigidbody.isKinematic = false;
 	}
 	
 	// Update is called once per frame
@@ -52,30 +57,31 @@ public class ColoredObjectScript : MonoBehaviour
 	{		
 		switch(currentColor)
 		{
-			case ColorChoice.None:
-				switchColor(Color.white);
-				switchTag("Untagged");
-				break;
-				
-			case ColorChoice.Left:
-				switchColor(ColorController.Instance.colorParameters.leftColor);
-				switchTag("LeftColor");
-				break;
-				
-			case ColorChoice.Right:
-				switchColor(ColorController.Instance.colorParameters.rightColor);
-				switchTag("RightColor");
-				break;
-				
-			case ColorChoice.Up:
-				switchColor(ColorController.Instance.colorParameters.upColor);
-				switchTag("UpColor");
-				break;
-				
-			case ColorChoice.Down:
-				switchColor(ColorController.Instance.colorParameters.downColor);
-				switchTag("DownColor");
-				break;
+		case ColorChoice.None:
+			switchColor(Color.white);
+			switchTag("Untagged");
+			break;
+			
+		case ColorChoice.Left:
+			switchColor(ColorController.Instance.colorParameters.leftColor);
+			switchTag("LeftColor");
+			break;
+			
+		case ColorChoice.Right:
+			switchColor(ColorController.Instance.colorParameters.rightColor);
+			switchTag("RightColor");
+			break;
+	/*
+		case ColorChoice.Up:
+			switchColor(ColorController.Instance.colorParameters.upColor);
+			switchTag("UpColor");
+			break;
+			
+		case ColorChoice.Down:
+			switchColor(ColorController.Instance.colorParameters.downColor);
+			switchTag("DownColor");
+			break;
+	*/
 		}
 	}
 	
@@ -112,4 +118,45 @@ public class ColoredObjectScript : MonoBehaviour
 	{
 		canChangeColor = state;
 	}
+	
+	public void Show()
+	{
+		if(renderer != null && !renderer.enabled)
+			renderer.enabled = true;
+			
+		if(collider != null == !collider.enabled)
+			collider.enabled = true;
+			
+		if(rigidbody != null && !isStatic)
+			rigidbody.isKinematic = false;
+	}
+	
+	public void Hide()
+	{
+		if(renderer != null && renderer.enabled)
+			renderer.enabled = false;
+		
+		if(collider != null == collider.enabled)
+			collider.enabled = false;
+			
+		if(rigidbody != null && !isStatic)
+			rigidbody.isKinematic = true;
+	}
+	/*
+	private void OnEnable()
+	{
+		if(!GameController.Instance.coloredObjectList.Contains(this))
+		{
+			GameController.Instance.coloredObjectList.Add(this);
+		}
+	}
+	
+	private void OnDisable()
+	{
+		if(GameController.Instance.coloredObjectList.Contains(this))
+		{
+			GameController.Instance.coloredObjectList.Remove(this);
+		}
+	}
+	*/
 }

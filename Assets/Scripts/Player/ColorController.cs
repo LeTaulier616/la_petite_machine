@@ -15,12 +15,10 @@ public class ColorController : Singleton<ColorController>
 	{
 		None,
 		Left,
-		Right,
-		Up,
-		Down
+		Right
 	}
 	
-	private ColorChoice currentColor;
+	public ColorChoice currentColor;
 	private ColorChoice previousColor;
 	
 	private bool canChangeColor;
@@ -35,7 +33,9 @@ public class ColorController : Singleton<ColorController>
 		colorEffect = GetComponent<AmplifyColorEffect>();
 		
 		currentColor = ColorChoice.None;
-		previousColor = ColorChoice.None;
+		previousColor = ColorChoice.Right;
+
+		switchColor(currentColor);
 		
 		canChangeColor = true;
 		leftWasReleased = true;
@@ -43,7 +43,7 @@ public class ColorController : Singleton<ColorController>
 		upWasReleased = true;
 		downWasReleased = true;
 	}
-	
+
 	// Update is called once per frame
 	void Update ()
 	{
@@ -60,7 +60,7 @@ public class ColorController : Singleton<ColorController>
 			{
 				currentColor = currentColor == ColorChoice.Right ? ColorChoice.None : ColorChoice.Right;
 			}
-			
+			/*
 			else if(upColorRequested())
 			{
 				currentColor = currentColor == ColorChoice.Up ? ColorChoice.None : ColorChoice.Up;
@@ -70,8 +70,9 @@ public class ColorController : Singleton<ColorController>
 			{
 				currentColor = currentColor == ColorChoice.Down ? ColorChoice.None : ColorChoice.Down;
 			}
-			
-			switchColor(currentColor);
+			*/
+			if(currentColor == previousColor)
+				switchColor(currentColor);
 		}
 	}
 	
@@ -95,38 +96,36 @@ public class ColorController : Singleton<ColorController>
 			downWasReleased = true;
 	}
 	
-	private void switchColor(ColorChoice currentColor)
-	{
-		if(currentColor == previousColor)
-		{
-			return;
-		}
-		
+	public void switchColor(ColorChoice currentColor)
+	{	
 		switch(currentColor)
 		{
 			case ColorChoice.None:
 			switchTexture(null);
-			
+			GameController.Instance.UpdateObjects(ColoredObject.ColorChoice.None);
 			break;
 			
 			case ColorChoice.Left:
 			switchTexture(colorParameters.leftTexture);
+			GameController.Instance.UpdateObjects(ColoredObject.ColorChoice.Left);
 			break;
 			
 			case ColorChoice.Right:
 			switchTexture(colorParameters.rightTexture);
-			
+			GameController.Instance.UpdateObjects(ColoredObject.ColorChoice.Right);
 			break;
-			
+
+			/*
 			case ColorChoice.Up:
 			switchTexture(colorParameters.upTexture);
-			
+			GameController.Instance.HideObjects(ColoredObjectScript.ColorChoice.Up);
 			break;
 			
 			case ColorChoice.Down:
 			switchTexture(colorParameters.downTexture);
-			
+			GameController.Instance.HideObjects(ColoredObjectScript.ColorChoice.Down);
 			break;
+			*/
 		}
 	}
 	
@@ -200,7 +199,12 @@ public class ColorController : Singleton<ColorController>
 	[System.Serializable]
 	public class ColorParameters
 	{
-		public Texture2D leftTexture, rightTexture, upTexture, downTexture;	
-		public Color32 leftColor, rightColor, upColor, downColor;		
+		public Color32 leftColor;
+		public Color32 leftTransparentColor;
+		public Texture2D leftTexture;
+
+		public Color32 rightColor;
+		public Color32 rightTransparentColor;
+		public Texture2D rightTexture;
 	}
 }

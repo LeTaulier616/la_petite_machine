@@ -10,7 +10,7 @@ GameObject:
   - 4: {fileID: 400000}
   - 33: {fileID: 3300000}
   - 23: {fileID: 2300000}
-  m_Layer: 2
+  m_Layer: 9
   m_Name: Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -30,7 +30,7 @@ GameObject:
   - 114: {fileID: 11400002}
   m_Layer: 2
   m_Name: PlayerController
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -54,7 +54,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100002}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7, y: 2, z: 0}
+  m_LocalPosition: {x: 0, y: 2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 400000}
@@ -174,8 +174,8 @@ MonoBehaviour:
     airControlFactor: .75
   lane:
     currentLane: 2
-    zOffsetValue: 2
-    zSpeed: 10
+    zOffsetValue: 3
+    zSpeed: 12
     laneChangeDirection: 0
     targetLane: 0
     changeLaneRequested: 0
@@ -184,6 +184,11 @@ MonoBehaviour:
     changeLaneOnceAgain: 0
     forceLaneChange: 0
     forceLaneChangeDirection: 0
+  stateMachine: {fileID: 0}
+  horizontalDirection: 0
+  previousHorizontalDirection: 0
+  jumpDirection: 0
+  interruptJump: 0
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -11,7 +11,7 @@ public class AmplifyColorVolumeBase : MonoBehaviour
 	public bool ShowInSceneView = true;
 
 	[HideInInspector] public VolumeEffectContainer EffectContainer = new VolumeEffectContainer();
-
+	/*
 	void OnDrawGizmos()
 	{
 		if ( ShowInSceneView )
@@ -39,4 +39,5 @@ public class AmplifyColorVolumeBase : MonoBehaviour
 			Gizmos.DrawCube( bc.center, bc.size );
 		}
 	}
+	*/
 }

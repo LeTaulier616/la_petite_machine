@@ -36,7 +36,7 @@ public class AmplifyColorBase : MonoBehaviour
 	public bool UseVolumes = false;
 	public float ExitVolumeBlendTime = 1.0f;
 	public Transform TriggerVolumeProxy = null;
-	public LayerMask VolumeCollisionMask = ~0;	
+	public LayerMask VolumeCollisionMask = ~0;
 
 	private Shader shaderBase;
 	private Shader shaderBlend;
@@ -283,7 +283,7 @@ public class AmplifyColorBase : MonoBehaviour
 		if ( actualTriggerProxy.transform.parent != reference )
 		{
 			actualTriggerProxy.Reference = reference;
-			actualTriggerProxy.gameObject.layer = reference.gameObject.layer;
+			actualTriggerProxy.gameObject.layer = LayerMask.NameToLayer("ColorTrigger");
 		}
 	
 		AmplifyColorVolumeBase foundVolume = null;

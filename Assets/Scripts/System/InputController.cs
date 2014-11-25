@@ -116,23 +116,26 @@ public class InputController : Singleton<InputController> {
 		Vector2 vectorToReturn = Vector2.zero;
 		float xValue = rightStickVector.x;
 		float yValue = rightStickVector.y;
-
+		
 		if(Mathf.Abs(xValue) < rightStick.deadZone)
 		{
 			xValue = 0;
 		}
-
+		
 		if(Mathf.Abs(yValue) < rightStick.deadZone)
 		{
 			yValue = 0;
 		}
 
 		//vectorToReturn = new Vector2(xValue * rightStick.sensitivity.x, yValue * rightStick.sensitivity.y);
+
 		vectorToReturn = new Vector2(xValue, yValue);
+
 		vectorToReturn = vectorToReturn.normalized * ((vectorToReturn.magnitude - rightStick.deadZone) / (1 - rightStick.deadZone));
 		vectorToReturn.x *= rightStick.sensitivity.x;
 		vectorToReturn.y *= rightStick.sensitivity.y;
-		
+
+
 		vectorToReturn = Vector2.ClampMagnitude(vectorToReturn, 1);
 
 		return vectorToReturn;

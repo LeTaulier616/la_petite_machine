@@ -143,12 +143,11 @@ public class CursorController : Singleton<CursorController>
 			
 			cursorMovementVector *= EvaluateAccelerationCurve();
 		}
-	
+		
 		else
 		{
-		 	cursorMovementVector *= EvaluateDecelerationCurve();
+			cursorMovementVector *= EvaluateDecelerationCurve();
 		}
-		
 	}
 	
 	private void MoveCursor()

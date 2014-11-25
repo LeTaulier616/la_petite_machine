@@ -53,19 +53,19 @@ namespace CustomProfileKeyboardMouse
 				new InputControlMapping
 				{
 					Handle = "Use",
-					Target = InputControlType.Action2,
+					Target = InputControlType.Action4,
 					Source = KeyCodeButton( KeyCode.E )
 				},
 				new InputControlMapping
 				{
 					Handle = "Switch Left",
-					Target = InputControlType.DPadLeft,
+					Target = InputControlType.Action3,
 					Source = KeyCodeButton( KeyCode.Alpha1 )
 				},
 				new InputControlMapping
 				{
 					Handle = "Switch Right",
-					Target = InputControlType.DPadRight,
+					Target = InputControlType.Action2,
 					Source = KeyCodeButton( KeyCode.Alpha2 )
 				},
 				new InputControlMapping
@@ -98,12 +98,14 @@ namespace CustomProfileKeyboardMouse
 					// Notes that up is positive in Unity, therefore the order of KeyCodes is down, up.
 					Source = KeyCodeAxis( KeyCode.S, KeyCode.Z )
 				},
-				new InputControlMapping {
+				new InputControlMapping
+				{
 					Handle = "Look X",
 					Target = InputControlType.RightStickX,
 					Source = KeyCodeAxis( KeyCode.LeftArrow, KeyCode.RightArrow )
 				},
-				new InputControlMapping {
+				new InputControlMapping
+				{
 					Handle = "Look Y",
 					Target = InputControlType.RightStickY,
 					Source = KeyCodeAxis( KeyCode.DownArrow, KeyCode.UpArrow )

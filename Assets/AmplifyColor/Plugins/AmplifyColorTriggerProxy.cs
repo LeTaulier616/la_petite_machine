@@ -26,6 +26,6 @@ public class AmplifyColorTriggerProxy : MonoBehaviour
 	void LateUpdate()
 	{
 		transform.position = Reference.position;
-		transform.rotation = Reference.rotation;		
+		transform.rotation = Reference.rotation;
 	}
 }
