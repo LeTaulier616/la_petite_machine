@@ -4,14 +4,20 @@ using System.Collections;
 [RequireComponent(typeof(AmplifyColorVolume))]
 public class ColorZone : MonoBehaviour
 {
+	[HideInInspector]
 	[SerializeField]
 	public ColorController.ColorChoice zoneColor;
 
 	private AmplifyColorEffect cameraEffect;
+
+	[HideInInspector]
 	public AmplifyColorVolume volume;
 
+	[HideInInspector]
 	[SerializeField]
 	private Color wireColor;
+
+	public ColorCannon[] linkedCannons;
 
 	// Use this for initialization
 	void Start () 
@@ -25,12 +31,8 @@ public class ColorZone : MonoBehaviour
 			renderer.enabled = false;
 
 		UpdateZoneVariables(zoneColor, volume);
-	}
-	
-	// Update is called once per frame
-	void Update () 
-	{
-		
+
+		SetLinkedCannons(linkedCannons);
 	}
 
 	public void UpdateZoneVariables(ColorController.ColorChoice choice, AmplifyColorVolume volume)
@@ -45,7 +47,7 @@ public class ColorZone : MonoBehaviour
 			Debug.LogWarning("Zone " + gameObject.name + " is set on None. Invalid setting");
 	}
 
-	void OnTriggerEnter(Collider other)
+	private void OnTriggerEnter(Collider other)
 	{
 		if(other.CompareTag("Player"))
 		{
@@ -54,7 +56,7 @@ public class ColorZone : MonoBehaviour
 		}
 	}
 
-	void OnTriggerExit(Collider other)
+	private void OnTriggerExit(Collider other)
 	{
 		if(other.CompareTag("Player"))
 		{
@@ -63,7 +65,7 @@ public class ColorZone : MonoBehaviour
 		}
 	}
 
-	void OnDrawGizmos()
+	private void OnDrawGizmos()
 	{
 		BoxCollider bc = GetComponent<BoxCollider>();
 
@@ -84,7 +86,7 @@ public class ColorZone : MonoBehaviour
 		}
 	}
 
-	void OnDrawGizmosSelected()
+	private void OnDrawGizmosSelected()
 	{
 		BoxCollider bc = GetComponent<BoxCollider>();
 
@@ -106,9 +108,18 @@ public class ColorZone : MonoBehaviour
 		}
 	}
 
+	private void SetLinkedCannons(ColorCannon[] linkedCannons)
+	{
+		foreach(ColorCannon canon in linkedCannons)
+		{
+			canon.SetColor(zoneColor);
+		}
+	}
+
 	IEnumerator EnterVolume()
 	{
 		ColorController.Instance.CanChangeColor(false);
+		PlayerController.Instance.InColorZone(true);
 		ColorController.Instance.currentColor = zoneColor;
 		
 		yield return new WaitForSeconds(volume.EnterBlendTime);
@@ -124,5 +135,8 @@ public class ColorZone : MonoBehaviour
 
 		ColorController.Instance.switchColor(ColorController.Instance.currentColor);
 		ColorController.Instance.CanChangeColor(true);
+		PlayerController.Instance.CanShoot(false);
+		PlayerController.Instance.InColorZone(false);
+		PlayerController.Instance.SetCannonColor(ColorController.ColorChoice.None);
 	}
 }

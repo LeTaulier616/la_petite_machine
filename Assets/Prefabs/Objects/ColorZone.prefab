@@ -87,6 +87,7 @@ MonoBehaviour:
   zoneColor: 1
   volume: {fileID: 0}
   wireColor: {r: 1, g: 0, b: 0, a: 1}
+  linkedCannons: []
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1

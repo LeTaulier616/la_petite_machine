@@ -20,6 +20,8 @@ public class ColorZoneEditor : Editor
 
 	public override void OnInspectorGUI()
 	{
+		serializedObject.Update();
+		
 		newColorChoice = _target.zoneColor;
 		
 		headerStyle = new GUIStyle();
@@ -49,7 +51,22 @@ public class ColorZoneEditor : Editor
 			_target.zoneColor = newColorChoice;
 			_target.UpdateZoneVariables(_target.zoneColor, _target.volume);
 		}
-		
+
+		EditorGUILayout.Space();
+
+		EditorGUIUtility.LookLikeInspector();
+
+		SerializedProperty cannons = serializedObject.FindProperty ("linkedCannons");
+
+		EditorGUI.BeginChangeCheck();
+
+			EditorGUILayout.PropertyField(cannons, true);
+
+		if(EditorGUI.EndChangeCheck())
+			serializedObject.ApplyModifiedProperties();
+
+		EditorGUIUtility.LookLikeControls();
+
 		if(GUI.changed)
 		{
 			EditorUtility.SetDirty(_target);

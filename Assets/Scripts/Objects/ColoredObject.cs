@@ -189,4 +189,9 @@ public class ColoredObject : MonoBehaviour
 			collider.enabled = false;
 		}
 	}
+
+	public void SwitchChoice(ColoredObject.ColorChoice choice)
+	{
+		currentColor = choice;
+	}
 }

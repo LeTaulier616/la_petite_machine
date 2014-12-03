@@ -17,7 +17,8 @@ public class ColorController : Singleton<ColorController>
 		Left,
 		Right
 	}
-	
+
+	[HideInInspector]
 	public ColorChoice currentColor;
 	private ColorChoice previousColor;
 	
@@ -71,7 +72,7 @@ public class ColorController : Singleton<ColorController>
 				currentColor = currentColor == ColorChoice.Down ? ColorChoice.None : ColorChoice.Down;
 			}
 			*/
-			if(currentColor == previousColor)
+			if(currentColor != previousColor)
 				switchColor(currentColor);
 		}
 	}

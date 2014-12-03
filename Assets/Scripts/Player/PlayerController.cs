@@ -21,6 +21,9 @@ public class PlayerController : Singleton<PlayerController> {
 
 	[Tooltip("All Lane-Movement related parameters are nested here.")]
 	public LaneParameters lane;
+
+	[Tooltip("All shooting related parameters are nested here.")]
+	public ShotParameters shot;
 	
 	private bool isMoving = false;
 	private bool isAiming = false;
@@ -34,12 +37,15 @@ public class PlayerController : Singleton<PlayerController> {
 	
 	private bool jumpWasReleased = false;
 	private bool _falling = false;
+
+	private bool shootWasReleased = false;
 	
 	private float timeInAir = 0;
 	private float jumpTime = 0;
 	private float currentHeightJumped = 0;
 	private float moveTime = 0;
 	private bool canAim = true;
+	private bool canShoot = false;
 	
 	private float leftStickPositiveDuration = 0;
 	private float leftStickNegativeDuration = 0;
@@ -75,7 +81,7 @@ public class PlayerController : Singleton<PlayerController> {
 	public MoveState moving;
 	public JumpState jumping;
 	public FallState falling;
-	public AimState aiming;
+	//public AimState aiming;
 	
 	private bool canMove;
 	private bool canJump;
@@ -95,6 +101,13 @@ public class PlayerController : Singleton<PlayerController> {
 	[HideInInspector]
 	public bool interruptJump = false;
 
+	private bool inColorZone = false;
+
+	[HideInInspector]
+	public ColorController.ColorChoice cannonColor;
+
+	[HideInInspector]
+	public GameObject playerMesh;
 
 	private void Start()
 	{
@@ -106,13 +119,15 @@ public class PlayerController : Singleton<PlayerController> {
 		moving = new MoveState();
 		jumping = new JumpState();
 		falling = new FallState();
-		aiming = new AimState();
+		//aiming = new AimState();
 				
 		stateMachine.SetState(idle);
 
 		CanMove(true);
 		CanJump(true);
 		CameraController.Instance.CanLook(true);
+
+		playerMesh = transform.Find("Mesh").gameObject;
 	}
 	
 
@@ -139,7 +154,11 @@ public class PlayerController : Singleton<PlayerController> {
 		{
 			jumpWasReleased = true;
 		}
-		
+
+		if(!InputController.Instance.GetControl(InputController.Instance.controls.fire).IsPressed)
+		{
+			shootWasReleased = true;
+		}
 		
 		if(!currentlyGrounded)
 		{
@@ -435,16 +454,18 @@ public class PlayerController : Singleton<PlayerController> {
 	{
 		bool shootRequested = false;
 		
-		if(rightTrigger > 0.0f)
+		if(rightTrigger > 0.0f && shootWasReleased)
 		{
 			shootRequested = true;
+			shootWasReleased = false;
 		}
 		
 		else if (InputController.Instance.activeDevice.Name == "Keyboard/Mouse")
 		{
-			if(InputController.Instance.GetControl(InputController.Instance.controls.fire).IsPressed)
+			if(InputController.Instance.GetControl(InputController.Instance.controls.fire).IsPressed && shootWasReleased)
 			{
 				shootRequested = true;
+				shootWasReleased = false;
 			}
 		}
 		
@@ -472,6 +493,21 @@ public class PlayerController : Singleton<PlayerController> {
 		return canAim;
 	}
 
+	public bool CanShoot()
+	{
+		return canShoot;
+	}
+
+	public bool InColorZone()
+	{
+		return inColorZone;
+	}
+
+	public void CanShoot(bool state)
+	{
+		canShoot = state;
+	}
+
 	public void CanAim(bool state)
 	{
 		canAim = state;
@@ -486,7 +522,32 @@ public class PlayerController : Singleton<PlayerController> {
 	{
 		canJump = state;
 	}
-	
+
+	public void InColorZone(bool state)
+	{
+		inColorZone = state;
+	}
+
+	public void SetCannonColor(ColorController.ColorChoice choice)
+	{
+		cannonColor = choice;
+
+		switch(cannonColor)
+		{
+			case ColorController.ColorChoice.None:
+			playerMesh.renderer.material.color = Color.white;
+			break;
+
+			case ColorController.ColorChoice.Left:
+			playerMesh.renderer.material.color = Color.red;
+			break;
+
+			case ColorController.ColorChoice.Right:
+			playerMesh.renderer.material.color = Color.green;
+			break;
+		}
+	}
+
 	public void ResetJumpValues()
 	{
 		jumpTime = 0;
@@ -755,6 +816,25 @@ public class PlayerController : Singleton<PlayerController> {
 	{
 		return timeInAir;
 	}
+
+	public void Shoot()
+	{
+		if(cannonColor == ColorController.ColorChoice.None)
+		{
+			Debug.LogWarning("cannonColor is set to None !");
+			return;
+		}
+
+		else
+		{
+			Vector3 shootOffset = horizontalDirection == Direction.Left ? -transform.right : transform.right;
+			GameObject shootInstance = Instantiate(Resources.Load("ColorShot"),
+			                                       transform.position + shootOffset,
+			                                       Quaternion.LookRotation(shootOffset)) as GameObject;
+		}
+
+		Debug.Log("Shoot !");
+	}
 	
 	[System.Serializable]
 	public class MovementParameters
@@ -822,6 +902,14 @@ public class PlayerController : Singleton<PlayerController> {
 		public PlayerController.Direction forceLaneChangeDirection = PlayerController.Direction.None;
 	}
 
+	[System.Serializable]
+	public class ShotParameters
+	{
+		public float travelSpeed;
+		public float range;
+		public float travelDistance;
+	}
+
 	public enum Lane
 	{
 		None,
@@ -873,8 +961,12 @@ public class IdleState : State
 			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.jumping);
 		
 		//Idle to aim state handling
-		if(PlayerController.Instance.AimRequested() && PlayerController.Instance.CanAim())
-			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.aiming);
+		//if(PlayerController.Instance.AimRequested() && PlayerController.Instance.CanAim())
+			//PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.aiming);
+
+		if(PlayerController.Instance.ShootRequested() && PlayerController.Instance.CanShoot() && PlayerController.Instance.InColorZone())
+			PlayerController.Instance.Shoot();
+
 	}
 	
 	public override void ExitState(GameObject go)
@@ -917,14 +1009,17 @@ public class MoveState : State
 		}
 		
 		//Idle to aim state handling
-		if(PlayerController.Instance.AimRequested())
-			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.aiming);
+		//if(PlayerController.Instance.AimRequested())
+			//PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.aiming);
 		
 		// Move to fall state handling
 		if(PlayerController.Instance.IsFalling())
 		{
 			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.falling);
 		}
+
+		if(PlayerController.Instance.ShootRequested() && PlayerController.Instance.CanShoot() && PlayerController.Instance.InColorZone())
+			PlayerController.Instance.Shoot();
 	}
 	
 	public override void ExitState(GameObject go)
@@ -965,7 +1060,9 @@ public class JumpState : State
 	{
 		if(PlayerController.Instance.JumpHeightReached() || PlayerController.Instance.interruptJump)
 			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.falling);
-		
+
+		if(PlayerController.Instance.ShootRequested() && PlayerController.Instance.CanShoot() && PlayerController.Instance.InColorZone())
+			PlayerController.Instance.Shoot();
 	}
 	
 	public override void ExitState(GameObject go)
@@ -1000,6 +1097,9 @@ public class FallState : State
 		{
 			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.moving);
 		}
+
+		if(PlayerController.Instance.ShootRequested() && PlayerController.Instance.CanShoot() && PlayerController.Instance.InColorZone())
+			PlayerController.Instance.Shoot();
 	}
 	
 	public override void ExitState(GameObject go)
@@ -1007,7 +1107,7 @@ public class FallState : State
 		
 	}
 }
-
+/*
 public class AimState : State
 {
 	public override void EnterState(GameObject go)
@@ -1045,4 +1145,5 @@ public class AimState : State
 		CursorController.Instance.Hide();
 	}
 }
+*/
 
