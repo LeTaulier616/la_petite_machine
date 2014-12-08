@@ -615,6 +615,7 @@ public class PlayerController : Singleton<PlayerController> {
 		{
 			isGrounded = true;
 		}
+
 		else
 		{
 			ray = new Ray(transform.position - new Vector3(-characterController.radius, characterController.height *0.4f,0), Vector3.down);
@@ -624,7 +625,10 @@ public class PlayerController : Singleton<PlayerController> {
 				isGrounded = true;
 			}
 		}
-		
+
+		if(hit.collider != null)
+			Debug.Log(hit.collider.name);
+
 		currentlyGrounded = isGrounded;
 		
 		return currentlyGrounded;
