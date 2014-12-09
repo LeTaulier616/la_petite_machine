@@ -15,6 +15,14 @@ Library/guidmapper
 Library/CurrentLayout.dwlt
 Library/CurrentMaximizeLayout.dwlt
 Library/ShaderCache.db
+Library/shadercompiler-1.log
+Library/shadercompiler-2.log
+Library/shadercompiler-3.log
+Library/shadercompiler-4.log
+Library/shadercompiler-5.log
+Library/shadercompiler-6.log
+Library/shadercompiler-7.log
+Library/shadercompiler-8.log
 Temp
 *.csproj
 *.pidb
