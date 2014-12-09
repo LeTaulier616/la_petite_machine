@@ -120,6 +120,27 @@ public class GameController : Singleton<GameController> {
 		}
 	}
 
+	public void UpdateColorObject(ColorObject obj)
+	{
+		if(colorObjectList.Contains(obj))
+		{
+			if(ColorController.Instance.currentColor == (ColorController.ColorChoice) ColoredObject.ColorChoice.None)
+			{
+				obj.Show();
+			}
+			
+			else if(ColorController.Instance.currentColor == (ColorController.ColorChoice) obj.currentColor)
+			{
+				obj.Hide();
+			}
+			
+			else
+			{
+				obj.Show ();
+			}
+		}
+	}
+
 	private void UpdateAntiColorObjects(ColorObject.ColorChoice choice)
 	{
 		foreach(AntiColorObject obj in anticolorObjectList)
@@ -134,6 +155,27 @@ public class GameController : Singleton<GameController> {
 				obj.Show();
 			}
 
+			else
+			{
+				obj.Hide();
+			}
+		}
+	}
+
+	public void UpdateAntiColorObject(AntiColorObject obj)
+	{
+		if(anticolorObjectList.Contains(obj))
+		{
+			if(ColorController.Instance.currentColor == ColorController.ColorChoice.None)
+			{
+				obj.Hide();
+			}
+			
+			else if (ColorController.Instance.currentColor == (ColorController.ColorChoice) obj.currentColor)
+			{
+				obj.Show();
+			}
+			
 			else
 			{
 				obj.Hide();

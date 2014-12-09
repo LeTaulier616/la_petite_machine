@@ -38,11 +38,11 @@ public class AntiColorObjectEditor : Editor
 			
 			drawColorButton(ColoredObject.ColorChoice.None, "None");
 			
-			//GUI.backgroundColor = ColorController.Instance.colorParameters.leftColor;
+			GUI.backgroundColor = ColorController.Instance.colorParameters.leftColor;
 
 			drawColorButton(ColoredObject.ColorChoice.Left, "Left");
 			
-			//GUI.backgroundColor = ColorController.Instance.colorParameters.rightColor;
+			GUI.backgroundColor = ColorController.Instance.colorParameters.rightColor;
 						
 			drawColorButton(ColoredObject.ColorChoice.Right, "Right");
 

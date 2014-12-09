@@ -3,8 +3,8 @@ using System.Collections;
 
 public class ColorCannon : MonoBehaviour 
 {
-	[HideInInspector]
-	public ColorController.ColorChoice cannonColor;
+	//[HideInInspector]
+	//public ColorController.ColorChoice cannonColor;
 
 	// Use this for initialization
 	void Start () 
@@ -17,9 +17,10 @@ public class ColorCannon : MonoBehaviour
 	{
 		transform.Rotate(Vector3.up, 100.0f * GameController.DeltaTime(), Space.World);
 	}
-
+	/*
 	public void SetColor(ColorController.ColorChoice choice)
 	{
+
 		if(choice == ColorController.ColorChoice.Left)
 		{
 			cannonColor = ColorController.ColorChoice.Right;
@@ -38,7 +39,7 @@ public class ColorCannon : MonoBehaviour
 			Destroy(gameObject);
 		}
 	}
-
+	*/
 	private void OnTriggerEnter(Collider other)
 	{
 		if(other.CompareTag("Player"))
@@ -46,7 +47,7 @@ public class ColorCannon : MonoBehaviour
 			if(PlayerController.Instance.InColorZone())
 			{
 				PlayerController.Instance.CanShoot(true);
-				PlayerController.Instance.SetCannonColor(cannonColor);
+				PlayerController.Instance.SetCannonColor();
 			}
 
 			else

@@ -157,7 +157,8 @@ public class ColoredObject : MonoBehaviour
 		
 		if(collider != null)
 		{
-			collider.enabled = true;
+			//collider.enabled = true;
+			collider.isTrigger = false;
 		}
 	}
 	
@@ -186,12 +187,8 @@ public class ColoredObject : MonoBehaviour
 		
 		if(collider != null)
 		{
-			collider.enabled = false;
+			//collider.enabled = false;
+			collider.isTrigger = true;
 		}
-	}
-
-	public void SwitchChoice(ColoredObject.ColorChoice choice)
-	{
-		currentColor = choice;
 	}
 }

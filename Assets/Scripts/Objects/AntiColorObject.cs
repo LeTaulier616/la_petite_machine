@@ -36,4 +36,19 @@ public class AntiColorObject : ColoredObject
 			GameController.Instance.UpdateColorObjectList(this, false);
 		}
 	}
+
+	public void SwitchChoice()
+	{
+		//currentColor = choice;
+		
+		if(currentColor == ColorChoice.Left)
+			currentColor = ColorChoice.Right;
+		
+		else
+			currentColor = ColorChoice.Left;
+		
+		updateColor(currentColor);
+		
+		GameController.Instance.UpdateAntiColorObject(this);
+	}
 }

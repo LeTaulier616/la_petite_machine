@@ -17,7 +17,7 @@ public class ColorZone : MonoBehaviour
 	[SerializeField]
 	private Color wireColor;
 
-	public ColorCannon[] linkedCannons;
+	//public ColorCannon[] linkedCannons;
 
 	// Use this for initialization
 	void Start () 
@@ -32,11 +32,14 @@ public class ColorZone : MonoBehaviour
 
 		UpdateZoneVariables(zoneColor, volume);
 
-		SetLinkedCannons(linkedCannons);
+		//	SetLinkedCannons(linkedCannons);
 	}
 
 	public void UpdateZoneVariables(ColorController.ColorChoice choice, AmplifyColorVolume volume)
 	{
+		if(volume == null)
+			volume = GetComponent<AmplifyColorVolume>();
+		
 		if(choice == ColorController.ColorChoice.Left)
 			volume.LutTexture = ColorController.Instance.colorParameters.leftTexture;
 
@@ -108,6 +111,7 @@ public class ColorZone : MonoBehaviour
 		}
 	}
 
+	/*
 	private void SetLinkedCannons(ColorCannon[] linkedCannons)
 	{
 		foreach(ColorCannon canon in linkedCannons)
@@ -115,6 +119,7 @@ public class ColorZone : MonoBehaviour
 			canon.SetColor(zoneColor);
 		}
 	}
+	*/
 
 	IEnumerator EnterVolume()
 	{
@@ -137,6 +142,6 @@ public class ColorZone : MonoBehaviour
 		ColorController.Instance.CanChangeColor(true);
 		PlayerController.Instance.CanShoot(false);
 		PlayerController.Instance.InColorZone(false);
-		PlayerController.Instance.SetCannonColor(ColorController.ColorChoice.None);
+		PlayerController.Instance.SetCannonColor();
 	}
 }

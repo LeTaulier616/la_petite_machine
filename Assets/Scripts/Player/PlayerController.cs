@@ -103,8 +103,8 @@ public class PlayerController : Singleton<PlayerController> {
 
 	private bool inColorZone = false;
 
-	[HideInInspector]
-	public ColorController.ColorChoice cannonColor;
+	//[HideInInspector]
+	//public ColorController.ColorChoice cannonColor;
 
 	[HideInInspector]
 	public GameObject playerMesh;
@@ -528,8 +528,9 @@ public class PlayerController : Singleton<PlayerController> {
 		inColorZone = state;
 	}
 
-	public void SetCannonColor(ColorController.ColorChoice choice)
+	public void SetCannonColor()
 	{
+		/*
 		cannonColor = choice;
 
 		switch(cannonColor)
@@ -546,6 +547,13 @@ public class PlayerController : Singleton<PlayerController> {
 			playerMesh.renderer.material.color = Color.green;
 			break;
 		}
+		*/
+
+		if(canShoot)
+			playerMesh.renderer.material.color = Color.yellow;
+		
+		else
+			playerMesh.renderer.material.color = Color.white;
 	}
 
 	public void ResetJumpValues()
@@ -820,21 +828,20 @@ public class PlayerController : Singleton<PlayerController> {
 
 	public void Shoot()
 	{
+		/*
 		if(cannonColor == ColorController.ColorChoice.None)
 		{
 			Debug.LogWarning("cannonColor is set to None !");
 			return;
 		}
-
-		else
+		*/
+		//else
 		{
 			Vector3 shootOffset = horizontalDirection == Direction.Left ? -transform.right : transform.right;
 			GameObject shootInstance = Instantiate(Resources.Load("ColorShot"),
 			                                       transform.position + shootOffset,
 			                                       Quaternion.LookRotation(shootOffset)) as GameObject;
 		}
-
-		Debug.Log("Shoot !");
 	}
 	
 	[System.Serializable]
@@ -1081,7 +1088,6 @@ public class FallState : State
 	
 	public override void UpdateState(GameObject go)
 	{
-		Debug.Log("EnterFallState!");
 		PlayerController.Instance.StickToGround();
 		PlayerController.Instance.UpdateMovement();
 		

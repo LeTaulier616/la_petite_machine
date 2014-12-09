@@ -36,11 +36,11 @@ public class ColorZoneEditor : Editor
 		
 		EditorGUILayout.BeginHorizontal();
 								
-			//GUI.backgroundColor = ColorController.Instance.colorParameters.leftColor;
+			GUI.backgroundColor = ColorController.Instance.colorParameters.leftColor;
 			
 			drawColorButton(ColorController.ColorChoice.Left, "Left");
 			
-			//GUI.backgroundColor = ColorController.Instance.colorParameters.rightColor;
+			GUI.backgroundColor = ColorController.Instance.colorParameters.rightColor;
 			
 			drawColorButton(ColorController.ColorChoice.Right, "Right");
 		
@@ -52,6 +52,7 @@ public class ColorZoneEditor : Editor
 			_target.UpdateZoneVariables(_target.zoneColor, _target.volume);
 		}
 
+		/*
 		EditorGUILayout.Space();
 
 		EditorGUIUtility.LookLikeInspector();
@@ -66,6 +67,7 @@ public class ColorZoneEditor : Editor
 			serializedObject.ApplyModifiedProperties();
 
 		EditorGUIUtility.LookLikeControls();
+		*/
 
 		if(GUI.changed)
 		{
