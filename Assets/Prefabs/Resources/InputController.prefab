@@ -52,11 +52,11 @@ MonoBehaviour:
     deadZone: .400000006
   controls:
     jump: 10
-    use: 11
+    use: 13
     aim: 14
     fire: 15
-    switchLeft: 8
-    switchRight: 9
+    switchLeft: 12
+    switchRight: 11
     switchUp: 6
     switchDown: 7
 --- !u!114 &11400002

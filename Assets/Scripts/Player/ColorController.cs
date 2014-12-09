@@ -31,7 +31,7 @@ public class ColorController : Singleton<ColorController>
 	// Use this for initialization
 	void Start ()
 	{
-		colorEffect = GetComponent<AmplifyColorEffect>();
+		colorEffect = CameraController.Instance.GetComponent<AmplifyColorEffect>();
 		
 		currentColor = ColorChoice.None;
 		previousColor = ColorChoice.Right;

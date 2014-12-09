@@ -22,17 +22,17 @@ public class ColorObject : ColoredObject
 
 	protected virtual void OnEnable()
 	{
-		if(!GameController.Instance.colorObjectList.Contains(this))
+		if(GameController.Instance != null)
 		{
-			GameController.Instance.colorObjectList.Add(this);
+			GameController.Instance.UpdateColorObjectList(this, true);
 		}
 	}
 	
 	protected virtual void OnDisable()
 	{
-		if(GameController.Instance.colorObjectList.Contains(this))
+		if(GameController.Instance != null)
 		{
-			GameController.Instance.colorObjectList.Remove(this);
+			GameController.Instance.UpdateColorObjectList(this, false);
 		}
 	}
 }

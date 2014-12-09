@@ -40,6 +40,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fc8ea017b32d514bb21c0837ab0f78d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  colorObjectList: []
+  anticolorObjectList: []
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -23,17 +23,17 @@ public class AntiColorObject : ColoredObject
 
 	protected virtual void OnEnable()
 	{
-		if(!GameController.Instance.anticolorObjectList.Contains(this))
+		if(GameController.Instance != null)
 		{
-			GameController.Instance.anticolorObjectList.Add(this);
+			GameController.Instance.UpdateColorObjectList(this, true);
 		}
 	}
 	
 	protected virtual void OnDisable()
 	{
-		if(GameController.Instance.anticolorObjectList.Contains(this))
+		if(GameController.Instance != null)
 		{
-			GameController.Instance.anticolorObjectList.Remove(this);
+			GameController.Instance.UpdateColorObjectList(this, false);
 		}
 	}
 }

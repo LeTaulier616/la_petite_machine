@@ -10,6 +10,7 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 	// This bool will help us know if the app is quitting
 	private static bool appIsClosing = false;
 
+	//[ExecuteInEditMode]
 	// The public Instance of T, accessible from anywhere
 	public static T Instance
 	{
@@ -17,11 +18,6 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 		get
 		{
 			// If the app is closing...
-			if (appIsClosing)
-			{
-				//... Return null, don't go further
-				return null;
-			}
 			if (_instance == null)
 			{
 				//... Find out if one already exists in the scene
@@ -34,27 +30,27 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 
 					singletonPrefab = Resources.Load(typeof(T).ToString()) as Object;
 
-
-					if(singletonPrefab != null)
+					if(!appIsClosing)
 					{
+						if(singletonPrefab != null)
+						{
 
-						newSingleton = Instantiate(Resources.Load(singletonPrefab.name, typeof(GameObject))) as GameObject;
-						if(newSingleton.GetComponent<T>() != null)
-							_instance = newSingleton.GetComponent<T>();
-						newSingleton.name = singletonPrefab.name;
-		
+							newSingleton = Instantiate(Resources.Load(singletonPrefab.name, typeof(GameObject))) as GameObject;
+							if(newSingleton.GetComponent<T>() != null)
+								_instance = newSingleton.GetComponent<T>();
+							newSingleton.name = singletonPrefab.name;
 
-						
-					}
-					else
-					{
-						Debug.Log("Not found!");
-						// Create a new GameObject...
-						newSingleton = new GameObject();
-						//... Add the T component to it
-						_instance = newSingleton.AddComponent<T>();
-						// Rename it with the T class's name
-						newSingleton.name = typeof(T).ToString();
+						}
+						else
+						{
+							Debug.Log("Not found!");
+							// Create a new GameObject...
+							newSingleton = new GameObject();
+							//... Add the T component to it
+							_instance = newSingleton.AddComponent<T>();
+							// Rename it with the T class's name
+							newSingleton.name = typeof(T).ToString();
+						}
 					}
 				}
 				// Mark it as DontDestroyOnLoad
@@ -64,7 +60,8 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 			return _instance;
 		}
 	}
-
+	
+	//[ExecuteInEditMode]
 	// At start, for all singletons
 	public void Start()
 	{
@@ -72,6 +69,7 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 		DontDestroyOnLoad((T) FindObjectOfType(typeof(T)));
 	}
 
+	//[ExecuteInEditMode]
 	// When the singleton object is destroyed...
 	public void OnDestroy ()
 	{

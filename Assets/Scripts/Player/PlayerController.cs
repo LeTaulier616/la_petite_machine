@@ -626,9 +626,6 @@ public class PlayerController : Singleton<PlayerController> {
 			}
 		}
 
-		if(hit.collider != null)
-			Debug.Log(hit.collider.name);
-
 		currentlyGrounded = isGrounded;
 		
 		return currentlyGrounded;
@@ -1084,6 +1081,7 @@ public class FallState : State
 	
 	public override void UpdateState(GameObject go)
 	{
+		Debug.Log("EnterFallState!");
 		PlayerController.Instance.StickToGround();
 		PlayerController.Instance.UpdateMovement();
 		
@@ -1102,8 +1100,8 @@ public class FallState : State
 			PlayerController.Instance.stateMachine.SetState(PlayerController.Instance.moving);
 		}
 
-		if(PlayerController.Instance.ShootRequested() && PlayerController.Instance.CanShoot() && PlayerController.Instance.InColorZone())
-			PlayerController.Instance.Shoot();
+		/*if(PlayerController.Instance.ShootRequested() && PlayerController.Instance.CanShoot() && PlayerController.Instance.InColorZone())
+			PlayerController.Instance.Shoot();*/
 	}
 	
 	public override void ExitState(GameObject go)

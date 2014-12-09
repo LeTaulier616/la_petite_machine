@@ -13,6 +13,7 @@ public class GameController : Singleton<GameController> {
 	
 	[HideInInspector]
 	public List<ColorObject> colorObjectList;
+	[HideInInspector]
 	public List<AntiColorObject> anticolorObjectList;
 
 	public static bool IsPaused()
@@ -136,6 +137,42 @@ public class GameController : Singleton<GameController> {
 			else
 			{
 				obj.Hide();
+			}
+		}
+	}
+
+	public void UpdateColorObjectList(ColorObject objectToUpdate, bool add)
+	{
+		if(add)
+		{
+			if(!colorObjectList.Contains(objectToUpdate))
+			{
+				colorObjectList.Add(objectToUpdate);
+			}
+		}
+		else
+		{
+			if(colorObjectList.Contains(objectToUpdate))
+			{
+				colorObjectList.Remove(objectToUpdate);
+			}
+		}
+	}
+
+	public void UpdateColorObjectList(AntiColorObject objectToUpdate, bool add)
+	{
+		if(add)
+		{
+			if(!anticolorObjectList.Contains(objectToUpdate))
+			{
+				anticolorObjectList.Add(objectToUpdate);
+			}
+		}
+		else
+		{
+			if(anticolorObjectList.Contains(objectToUpdate))
+			{
+				anticolorObjectList.Remove(objectToUpdate);
 			}
 		}
 	}
