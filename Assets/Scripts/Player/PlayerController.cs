@@ -34,7 +34,8 @@ public class PlayerController : Singleton<PlayerController> {
 	private Direction leftStickSwipeDirection = Direction.None;
 	private bool leftStickHasBeenReleased = true;
 	private bool leftStickYHasBeenReleased = true;
-	
+
+	private bool applyGravity = true;
 	private bool jumpWasReleased = false;
 	private bool _falling = false;
 
@@ -54,6 +55,7 @@ public class PlayerController : Singleton<PlayerController> {
 	private bool currentlyGrounded = false;
 	private bool previousGroundedState = false;
 	private float idleTime = 0;
+	private float previousFallingSpeedMultiplier = 0;
 	private float fallingSpeedMultiplier = 0;
 	private float risingSpeedMultiplier = 0;
 	private float horizontalSpeedMultiplier = 0;
@@ -134,6 +136,16 @@ public class PlayerController : Singleton<PlayerController> {
 	private void Update()
 	{
 		UpdateEarlyVariables();
+		Ray ray1 = new Ray(transform.position + new Vector3(characterController.radius - 0.1f, characterController.height *0.4f,0), transform.TransformDirection(Vector3.forward));
+		Ray ray2 = new Ray(transform.position + new Vector3(-characterController.radius +0.1f, characterController.height *0.4f,0), transform.TransformDirection(Vector3.forward));
+		Ray ray3 = new Ray(transform.position + new Vector3(characterController.radius -0.1f, -characterController.height *0.4f,0), transform.TransformDirection(Vector3.forward));
+		Ray ray4 = new Ray(transform.position + new Vector3(-characterController.radius +0.1f, -characterController.height *0.4f,0), transform.TransformDirection(Vector3.forward));
+
+		Debug.DrawRay(ray1.origin, ray1.direction, Color.red);
+		Debug.DrawRay(ray2.origin, ray2.direction, Color.red);
+		Debug.DrawRay(ray3.origin, ray3.direction, Color.red);
+		Debug.DrawRay(ray4.origin, ray4.direction, Color.red);
+
 	}
 	
 	
@@ -242,7 +254,7 @@ public class PlayerController : Singleton<PlayerController> {
 		Vector2 currentLeftStickValue = InputController.Instance.LeftStick();
 		//lane.changeLaneRequested = false;
 
-		if(!AimRequested() && currentLeftStickValue != Vector2.zero)
+		if(currentLeftStickValue != Vector2.zero)
 		{
 			leftStickMovedDuration += GameController.DeltaTime();
 
@@ -294,21 +306,18 @@ public class PlayerController : Singleton<PlayerController> {
 		{
 			//lane.changeLaneOnceAgain = false;
 			// If change lane requested
-			if((leftStickSwipeDirection == Direction.Up || leftStickSwipeDirection == Direction.Down) || (lane.forceLaneChange && lane.forceLaneChangeDirection != Direction.None))
+			if(((leftStickSwipeDirection == Direction.Up || leftStickSwipeDirection == Direction.Down) && lane.manualLaneChangeAllowed) || (lane.forceLaneChange && lane.forceLaneChangeDirection != Direction.None))
 			{
 				newTargetLane = GetLane((lane.forceLaneChange ? lane.forceLaneChangeDirection : leftStickSwipeDirection));
+				StopCoroutine("AutomaticLaneChangeRoutine");
 
-
-				if(newTargetLane != lane.currentLane && newTargetLane != Lane.None)
+				if(newTargetLane != lane.currentLane && newTargetLane != Lane.None && (lane.forceLaneChange || LaneIsFree(newTargetLane)))
 				{
 					lane.changeLaneRequested = true;
 					lane.laneChangeDirection = (lane.forceLaneChange ? lane.forceLaneChangeDirection : leftStickSwipeDirection);
 
 					lane.targetLane = newTargetLane;
 					lane.zAtSwitchStart = transform.position.z;
-
-					//Direction directionToCheck = lane.laneChangeDirection;
-
 
 					lane.targetZ = transform.position.z + (lane.laneChangeDirection == Direction.Up ? lane.zOffsetValue : -lane.zOffsetValue);
 				}
@@ -321,7 +330,7 @@ public class PlayerController : Singleton<PlayerController> {
 		}
 		else
 		{
-			if(leftStickSwipeDirection != Direction.None)
+			if(leftStickSwipeDirection != Direction.None && lane.automaticLaneChangeAllowed)
 			{
 				lane.changeLaneOnceAgain = true;
 				lane.forceLaneChangeDirection = leftStickSwipeDirection;
@@ -330,6 +339,262 @@ public class PlayerController : Singleton<PlayerController> {
 		
 
 	}
+
+
+	public bool LaneIsFree(Lane laneToCheck)
+	{
+		bool laneIsFree = true;
+		Direction directionToCheck = Direction.None;
+
+		directionToCheck = (lane.forceLaneChange ? lane.forceLaneChangeDirection : leftStickSwipeDirection );
+
+		/*if(directionToCheck != Direction.None)
+		{*/
+			Vector3 raycastDirection = Vector3.zero;
+
+			switch (directionToCheck)
+			{
+			case Direction.Up:
+				raycastDirection = transform.TransformDirection(Vector3.forward);
+				break;
+			case Direction.Down:
+				raycastDirection = transform.TransformDirection(Vector3.back);
+				break;
+			default:
+				break;
+			}
+
+			lane.blockedAreaFeet = LaneParameters.BlockArea.None;
+			lane.blockedAreaHead = LaneParameters.BlockArea.None;
+
+
+			float distanceToCheck = 3;
+
+			Vector3 rayOffset = Vector3.zero;
+
+			for(int i = 0; i < 4; i++)
+			{
+				if(i == 0)
+					rayOffset = new Vector3(characterController.radius -0.1f, characterController.height *0.5f,0);
+				else if(i == 1)
+					rayOffset = new Vector3(-characterController.radius +0.1f, characterController.height *0.5f,0);
+				else if(i == 2)
+					rayOffset = new Vector3(characterController.radius -0.1f, -characterController.height *0.5f,0);
+				else if(i == 3)
+					rayOffset = new Vector3(-characterController.radius +0.1f, -characterController.height *0.5f,0);
+
+				Ray ray = new Ray(transform.position + rayOffset, raycastDirection);
+				RaycastHit hit;
+				
+				if(Physics.Raycast(ray, out hit, distanceToCheck, defaultLayer))
+				{
+					laneIsFree = false;
+					switch(i)
+					{
+					case 0:
+						lane.blockedAreaHead = LaneParameters.BlockArea.Right;
+						break;
+					case 1:
+						if(lane.blockedAreaHead == LaneParameters.BlockArea.None)
+							lane.blockedAreaHead = LaneParameters.BlockArea.Left;
+						else
+							lane.blockedAreaHead = LaneParameters.BlockArea.Both;
+						break;
+					case 2:
+						lane.blockedAreaFeet = LaneParameters.BlockArea.Right;
+						break;
+					default:
+						if(lane.blockedAreaFeet == LaneParameters.BlockArea.None)
+							lane.blockedAreaFeet = LaneParameters.BlockArea.Left;
+						else
+							lane.blockedAreaFeet = LaneParameters.BlockArea.Both;
+						break;
+					}
+				}
+				else
+				{
+				}
+			}
+		/*}
+		else laneIsFree = false;*/
+
+		return laneIsFree;
+	}
+
+	public void AutomaticLaneChangeCheck()
+	{
+		if(lane.automaticLaneChangeAllowed)
+		{
+
+			List<float> validPointsHeights = new List<float>();
+			List<Lane> validLanes = new List<Lane>();
+			List<Direction> validDirections = new List<Direction>();
+
+			for(int i = 0; i < 3; i++)
+			{
+				Lane automaticTargetLane = Lane.Front;
+				Direction automaticTargetLaneDirection = Direction.None;
+				bool validAutomaticLaneSwitching = false;
+
+				if(i == 1)
+					automaticTargetLane = Lane.Center;
+				else if(i == 2)
+					automaticTargetLane = Lane.Back;
+
+				automaticTargetLaneDirection = GetDirectionForLane(automaticTargetLane);
+
+				if(automaticTargetLaneDirection != Direction.None)
+				{
+					if(lane.currentLane != automaticTargetLane && LaneIsFree(automaticTargetLane))
+					{
+						Ray targetLaneHeightRay = new Ray(new Vector3(transform.position.x, (transform.position.y + (characterController.height*0.5f) + movement.jumpHeight), GetLaneTargetZ(automaticTargetLane)),
+						                                  Vector3.down);
+						RaycastHit hit;
+
+						if(Physics.Raycast(targetLaneHeightRay, out hit, 100, defaultLayer))
+						{
+							if(hit.point.y > transform.position.y)
+							{
+								if(Vector3.Distance(new Vector3 (0, hit.point.y, 0), new Vector3(0,(transform.position.y - (characterController.height*0.5f)),0)) > 0.1f &&
+								   Vector3.Distance(new Vector3 (0, hit.point.y, 0), new Vector3(0,(transform.position.y - (characterController.height*0.5f)),0)) < (movement.jumpHeight - currentHeightJumped) +0.1f)
+								{
+									bool enoughSpace = true;
+									Ray enoughSpaceToFitRay = new Ray(hit.point, Vector3.up);
+
+									RaycastHit hit2;
+									if(Physics.Raycast(enoughSpaceToFitRay, out hit2, characterController.height+0.08f, defaultLayer))
+									{
+										enoughSpace = false;
+									}
+							
+									if(enoughSpace)
+									{
+										validAutomaticLaneSwitching = true;
+
+										AutoLaneSwitchSpecific specificBehavior = hit.collider.GetComponent<AutoLaneSwitchSpecific>();
+										if(specificBehavior != null)
+										{
+											if(specificBehavior.ignoredByAutoSwitch)
+												validAutomaticLaneSwitching = false;
+										}
+
+									}
+								}
+							}
+						}
+
+						if(validAutomaticLaneSwitching)
+						{
+							validPointsHeights.Add(hit.point.y);
+							validLanes.Add(automaticTargetLane);
+							validDirections.Add(automaticTargetLaneDirection);
+						}
+					}
+				}
+			}
+
+			if(validPointsHeights != null && validPointsHeights.Count > 0)
+			{
+				int highestPointIndex = 0;
+				float currentHighestPoint = -100f;
+				int u = -1;
+
+				foreach(float currentValidHeight in validPointsHeights)
+				{
+					u++;
+
+					if(currentValidHeight > currentHighestPoint)
+					{
+						currentHighestPoint = currentValidHeight;
+						highestPointIndex = u;
+					}
+
+					Debug.Log(validLanes[u] + " is a valid lane with height of " + currentValidHeight);
+				}
+
+				Debug.Log("Highest: " + validLanes[highestPointIndex] + " with " + currentHighestPoint);
+
+				Debug.Log("Automatic change to: " + validLanes[highestPointIndex].ToString());
+				 
+				lane.automaticChangeLaneDirection = validDirections[highestPointIndex];
+
+				StopCoroutine("AutomaticLaneChangeRoutine");
+				StartCoroutine("AutomaticLaneChangeRoutine");
+			}
+		}
+	}
+
+	public Direction GetDirectionForLane(Lane targetedLane)
+	{
+		Direction dirToReturn = Direction.None;
+
+		switch (targetedLane)
+		{
+		case Lane.Back:
+			switch(lane.currentLane)
+			{
+			case Lane.Center:
+				dirToReturn = Direction.Up;
+				break;
+			default:
+				break;
+			}
+			break;
+		case Lane.Center:
+			switch(lane.currentLane)
+			{
+			case Lane.Back:
+				dirToReturn = Direction.Down;
+				break;
+			case Lane.Front:
+				dirToReturn = Direction.Up;
+				break;
+			default:
+				break;
+			}
+			break;
+		case Lane.Front:
+			switch(lane.currentLane)
+			{
+			case Lane.Center:
+				dirToReturn = Direction.Down;
+				break;
+			default:
+				break;
+			}
+			break;
+		default:
+			break;
+		}
+
+		return dirToReturn;
+	}
+
+	private IEnumerator AutomaticLaneChangeRoutine()
+	{
+		//Debug.Log("Automatic Lane Change now!");
+		AuthorizeAutomaticLaneChange(false);
+		lane.changeLaneOnceAgain = false;
+		lane.changeLaneRequested = false;
+		lane.laneChangeDirection = Direction.None;
+		lane.forceLaneChangeDirection = Direction.None;
+
+		yield return new WaitForSeconds(0.05f);
+		lane.forceLaneChange = true;
+		lane.forceLaneChangeDirection = lane.automaticChangeLaneDirection;
+		AuthorizeManualLaneChange(false);
+	}
+
+	public void AuthorizeAutomaticLaneChange(bool newState)
+	{
+		lane.automaticLaneChangeAllowed = newState;
+	}
+
+	public void AuthorizeManualLaneChange(bool newState)
+	{
+		lane.manualLaneChangeAllowed = newState;
+	}
+
 
 	public Lane GetLane(Direction relativeDirection)
 	{
@@ -375,25 +640,95 @@ public class PlayerController : Singleton<PlayerController> {
 	{
 		if(lane.changeLaneRequested)
 		{
+
 			float zSpeed = lane.zSpeed;
 
 			if(Vector3.Distance(transform.position, new Vector3(transform.position.x, transform.position.y, lane.targetZ)) > 0.1f)
 			{
-				zSpeed *= ((lane.laneChangeDirection == Direction.Up ? 1 : -1) * GameController.DeltaTime());
-				movementVector += new Vector3(0,0, zSpeed);
+				bool wentTooFar = false;
+
+				zSpeed *= (((transform.position.z - lane.targetZ < 0) ? 1 : -1) * GameController.DeltaTime());
+
+				previousFallingSpeedMultiplier = fallingSpeedMultiplier;
+				//fallingSpeedMultiplier = 0.005f;
+
+				/*if(zSpeed > 0)
+				{
+					if(transform.position.z - lane.targetZ >= 0)
+						wentTooFar = true;
+				}
+				else if(zSpeed < 0)
+				{
+					if(Mathf.Abs(transform.position.z) - Mathf.Abs(lane.targetZ) >= 0)
+						wentTooFar = true;
+				}*/
+
+				/*if(!LaneIsFree(lane.targetLane))
+				{
+					CancelCurrentLineChange();
+				}*/
+
+				if(!wentTooFar)
+				{
+					movementVector += new Vector3(0,0, zSpeed);
+				}
+				else
+					ArrivedAtNewLane();
 			}
 			else
 			{
-				/*if(lane.targetLane != lane.currentLane)
-				{*/
-					ArrivedAtNewLane();
-				//}
+				ArrivedAtNewLane();
 			}
 		}
 	}
 
+	public void CancelCurrentLineChange()
+	{
+		Debug.Log("CancelCurrentLineChange!");
+		lane.targetZ = GetLaneTargetZ(lane.currentLane);
+		/*lane.changeLaneRequested = false;
+		lane.forceLaneChange = true;
+		lane.targetLane = lane.currentLane;*/
+		//lane.forceLaneChangeDirection = GetOppositeChangeLaneDirection();
+
+		//lane.targetZ += (lane.forceLaneChangeDirection == Direction.Up ? lane.zOffsetValue : -lane.zOffsetValue);
+		
+	}
+
+	public float GetLaneTargetZ(Lane laneToGet)
+	{
+		float zToReturn = 0f;
+		switch(laneToGet)
+		{
+		case Lane.Back:
+			zToReturn = 3;
+			break;
+		case Lane.Center:
+			zToReturn = 0;
+			break;
+		case Lane.Front:
+			zToReturn = -3;
+			break;
+		default:
+			break;
+		}
+
+		return zToReturn;
+	}
+
+	public Direction GetOppositeChangeLaneDirection()
+	{
+		Direction dirToReturn = Direction.Up;
+		if(lane.laneChangeDirection == Direction.Up)
+			dirToReturn = Direction.Down;
+		return dirToReturn;
+
+	}
+
 	public void ArrivedAtNewLane()
 	{
+		fallingSpeedMultiplier = previousFallingSpeedMultiplier;
+
 		lane.currentLane = lane.targetLane;
 
 		lane.changeLaneRequested = false;
@@ -594,20 +929,37 @@ public class PlayerController : Singleton<PlayerController> {
 	public void StickToGround()
 	{
 		stickToTheGround = false;
-		
-		Ray ray = new Ray(transform.position - new Vector3(0, characterController.height *0.48f,0), Vector3.down);
-		RaycastHit hit;
-		
-		
-		if(Physics.Raycast(ray, out hit, 0.3f, defaultLayer))
+				
+		/*if(Physics.Raycast(ray, out hit, 0.5f, defaultLayer))
 		{
 			stickToTheGround = true;
 			IsGrounded(true);
-			transform.position = new Vector3(transform.position.x, hit.point.y + (characterController.height *0.5f) + 0.1f,transform.position.z);
+			transform.position = new Vector3(transform.position.x, hit.point.y + (characterController.height * 0.52f),transform.position.z);
 		}
 		else
 		{
 			stickToTheGround = false;
+		}*/
+
+		Ray ray = new Ray(transform.position - new Vector3(characterController.radius, characterController.height *0.45f,0), Vector3.down);
+		RaycastHit hit;
+		
+		if(Physics.Raycast(ray, out hit, 0.4f, defaultLayer))
+		{
+			stickToTheGround = true;
+			IsGrounded(true);
+			transform.position = new Vector3(transform.position.x, hit.point.y + (characterController.height * 0.55f), transform.position.z);
+		}
+		else
+		{
+			ray = new Ray(transform.position - new Vector3(-characterController.radius, characterController.height *0.45f,0), Vector3.down);
+			
+			if(Physics.Raycast(ray, out hit, 0.4f, defaultLayer))
+			{
+				stickToTheGround = true;
+				IsGrounded(true);
+				transform.position = new Vector3(transform.position.x, hit.point.y + (characterController.height * 0.55f), transform.position.z);
+			}
 		}
 		
 	}
@@ -635,7 +987,13 @@ public class PlayerController : Singleton<PlayerController> {
 		}
 
 		currentlyGrounded = isGrounded;
-		
+
+		if(currentlyGrounded)
+		{
+			AuthorizeManualLaneChange(true);
+			AuthorizeAutomaticLaneChange(true);
+		}
+
 		return currentlyGrounded;
 	}
 	
@@ -738,7 +1096,7 @@ public class PlayerController : Singleton<PlayerController> {
 	
 	public void UpdateGravity()
 	{
-		movementVector += GetGravityValue(); 
+		movementVector += GetGravityValue();
 	}
 	
 	public void ApplyAirControlFactor()
@@ -801,7 +1159,10 @@ public class PlayerController : Singleton<PlayerController> {
 	
 	public Vector3 GetGravityValue()
 	{
-		return ((Physics.gravity * GameController.DeltaTime()) * movement.fallingSpeed) * fallingSpeedMultiplier;
+		if(applyGravity)
+			return ((Physics.gravity * GameController.DeltaTime()) * movement.fallingSpeed) * fallingSpeedMultiplier;
+		else
+			return Vector3.zero;
 	}
 	
 	public bool JumpHeightReached()
@@ -888,10 +1249,26 @@ public class PlayerController : Singleton<PlayerController> {
 	[System.Serializable]
 	public class LaneParameters
 	{
+		public enum BlockArea
+		{
+			None,
+			Top,
+			Bottom,
+			Left,
+			Right,
+			Both,
+			All
+		}
 		[HideInInspector]
 		public Lane currentLane = Lane.Center;
 		public float zOffsetValue = 5;
 		public float zSpeed = 2;
+		[HideInInspector]
+		public bool automaticLaneChangeAllowed = true;
+		[HideInInspector]
+		public bool manualLaneChangeAllowed = true;
+		[HideInInspector]
+		public Direction automaticChangeLaneDirection = Direction.None;
 		[HideInInspector]
 		public PlayerController.Direction laneChangeDirection = PlayerController.Direction.None;
 		[HideInInspector]
@@ -908,6 +1285,9 @@ public class PlayerController : Singleton<PlayerController> {
 		public bool forceLaneChange = false;
 		[HideInInspector]
 		public PlayerController.Direction forceLaneChangeDirection = PlayerController.Direction.None;
+
+		public BlockArea blockedAreaHead;
+		public BlockArea blockedAreaFeet;
 	}
 
 	[System.Serializable]
@@ -974,6 +1354,7 @@ public class IdleState : State
 
 		if(PlayerController.Instance.ShootRequested() && PlayerController.Instance.CanShoot() && PlayerController.Instance.InColorZone())
 			PlayerController.Instance.Shoot();
+
 
 	}
 	
@@ -1056,7 +1437,8 @@ public class JumpState : State
 	{
 		PlayerController.Instance.UpdateJumpMovement();
 		PlayerController.Instance.UpdateMovement();
-		
+
+		PlayerController.Instance.AutomaticLaneChangeCheck();
 		PlayerController.Instance.UpdateLaneChangeMovement();
 		
 		PlayerController.Instance.ApplyAirControlFactor();
