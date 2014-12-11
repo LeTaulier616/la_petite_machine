@@ -45,7 +45,9 @@ public class ColoredObject : MonoBehaviour
 		updateColor(currentColor);
 
 		if(rigidbody != null && !isStatic)
+		{
 			rigidbody.isKinematic = false;
+		}
 
 		canChangeColor = true;
 	}
