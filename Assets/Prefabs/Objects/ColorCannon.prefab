@@ -71,7 +71,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4d9ba6d0a1e1554cbbcf965e63eae4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cannonColor: 0
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1

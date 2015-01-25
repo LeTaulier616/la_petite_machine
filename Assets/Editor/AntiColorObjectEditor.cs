@@ -9,179 +9,148 @@ public class AntiColorObjectEditor : Editor
 	AntiColorObject _target;
 
 	ColoredObject.ColorChoice newColorChoice;
-
-	GUIStyle boldStyle;
-	GUIStyle headerStyle;
+	ColoredObject.HideMode newHideMode;
+	bool newIsStatic;
+	
+	int colorGridInt;
+	string[] colorStrings = new string[] {"None", "Left", "Right"};
+	
+	int modeGridInt;
+	string[] modeStrings = new string[] {"Invisible", "Transparent"};
+	
+	int statusGridInt;
+	string[] statusStrings = new string[] {"Static", "Non-Static"};
 
 	void OnEnable()
 	{
 		_target = (AntiColorObject)target;
+
+		InitializeGridInts();
 	}
 
 	public override void OnInspectorGUI()
 	{
 		newColorChoice = _target.currentColor;
-
-		headerStyle = new GUIStyle();
-		headerStyle.fontStyle = FontStyle.Bold;
-		headerStyle.normal.textColor = Color.white;
+		newHideMode = _target.hideMode;
+		newIsStatic = _target.isStatic;
 		
-		boldStyle = new GUIStyle(GUI.skin.button);
-		boldStyle.fontStyle = FontStyle.Bold;
-		boldStyle.normal.textColor = Color.white;
+		EditorGUILayout.LabelField("Color", EditorStyles.boldLabel);
 		
-		EditorGUILayout.LabelField("Color", headerStyle);
+		colorGridInt = GUILayout.SelectionGrid(colorGridInt, colorStrings, 3);
 		
-		EditorGUILayout.BeginHorizontal();
-			
-			GUI.backgroundColor = Color.white;
-			
-			drawColorButton(ColoredObject.ColorChoice.None, "None");
-			
-			GUI.backgroundColor = ColorController.Instance.colorParameters.leftColor;
-
-			drawColorButton(ColoredObject.ColorChoice.Left, "Left");
-			
-			GUI.backgroundColor = ColorController.Instance.colorParameters.rightColor;
-						
-			drawColorButton(ColoredObject.ColorChoice.Right, "Right");
-
-			/*
-				if(ColorController.Instance != null)
-					GUI.backgroundColor = ColorController.Instance.colorParameters.upColor;
-				
-				else
-					GUI.backgroundColor = new Color32(255, 165, 168, 255);
-				
-				drawColorButton(ColoredObject.ColorChoice.Up, "Up");
-			
-				if(ColorController.Instance != null)
-					GUI.backgroundColor = ColorController.Instance.colorParameters.downColor;
-				
-				else
-					GUI.backgroundColor = new Color32(128, 255, 160, 255);
-				
-				drawColorButton(ColoredObject.ColorChoice.Down, "Down");
-			*/
-			
-		EditorGUILayout.EndHorizontal();
+		EditorGUILayout.LabelField("Mode", EditorStyles.boldLabel);
 		
-		EditorGUILayout.Separator();
-
-		EditorGUILayout.LabelField("Mode", headerStyle);
-
-		EditorGUILayout.BeginHorizontal();
-
-			if(_target.hideMode == ColoredObject.HideMode.Invisible)
-				GUI.backgroundColor = Color.green;
-
-			else
-				GUI.backgroundColor = Color.white;
-
-			drawModeButton(ColoredObject.HideMode.Invisible, "Invisible");
-
-			if(_target.hideMode == ColoredObject.HideMode.Transparent)
-				GUI.backgroundColor = Color.green;
-			
-			else
-				GUI.backgroundColor = Color.white;
-			
-			drawModeButton(ColoredObject.HideMode.Transparent, "Transparent");
-
-		EditorGUILayout.EndHorizontal();
-
-		EditorGUILayout.Separator();
+		modeGridInt = GUILayout.SelectionGrid(modeGridInt, modeStrings, 2);
 		
-		EditorGUILayout.LabelField("Status", headerStyle);
+		EditorGUILayout.LabelField("Status", EditorStyles.boldLabel);
 		
-		EditorGUILayout.BeginHorizontal();
+		statusGridInt = GUILayout.SelectionGrid(statusGridInt, statusStrings, 2);
 		
-			if(_target.isStatic)
-				GUI.backgroundColor = Color.green;
-			
-			else
-				GUI.backgroundColor = Color.white;
-			
-			drawStateButton(true, "Static");
-			
-			if(_target.isStatic)
-				GUI.backgroundColor = Color.white;
-			
-			else
-				GUI.backgroundColor = Color.green;
-			
-			drawStateButton(false, "Non-Static");
-			
-			
-		EditorGUILayout.EndHorizontal();
+		UpdateEnums();
 
+		if(GUI.changed)
+		{
+			UpdateVariables();
+			EditorUtility.SetDirty(_target);
+		}
+	}
+
+	public void InitializeGridInts()
+	{
+		switch(_target.currentColor)
+		{
+		case ColoredObject.ColorChoice.None:
+			colorGridInt = 0;
+			break;
+			
+		case ColoredObject.ColorChoice.Left:
+			colorGridInt = 1;
+			break;
+			
+		case ColoredObject.ColorChoice.Right:
+			colorGridInt = 2;
+			break;
+		}
+		
+		switch(_target.hideMode)
+		{
+		case ColoredObject.HideMode.Invisible:
+			modeGridInt = 0;
+			break;
+			
+		case ColoredObject.HideMode.Transparent:
+			modeGridInt = 1;
+			break;
+		}
+		
+		switch(_target.isStatic)
+		{
+		case true:
+			statusGridInt = 0;
+			break;
+			
+		case false:
+			statusGridInt = 1;
+			break;
+		}
+	}
+	
+	public void UpdateEnums()
+	{
+		switch(colorGridInt)
+		{
+		case 0:
+			newColorChoice = ColoredObject.ColorChoice.None;
+			break;
+			
+		case 1:
+			newColorChoice = ColoredObject.ColorChoice.Left;
+			break;
+			
+		case 2:
+			newColorChoice = ColoredObject.ColorChoice.Right;
+			break;
+		}
+		
+		switch(modeGridInt)
+		{
+		case 0:
+			newHideMode = ColoredObject.HideMode.Invisible;
+			break;
+			
+		case 1:
+			newHideMode = ColoredObject.HideMode.Transparent;
+			break;
+		}
+		
+		switch(statusGridInt)
+		{
+		case 0:
+			newIsStatic = true;
+			break;
+			
+		case 1:
+			newIsStatic = false;
+			break;
+		}
+	}
+	
+	public void UpdateVariables()
+	{
 		if(newColorChoice != _target.currentColor)
 		{
 			_target.currentColor = newColorChoice;
 			_target.updateColor(_target.currentColor);
 		}
-
-		if(GUI.changed)
+		
+		if(newHideMode != _target.hideMode)
 		{
-			EditorUtility.SetDirty(_target);
-		}
-
-	}
-
-	public void drawModeButton(ColoredObject.HideMode mode, string label)
-	{
-		if(mode == _target.hideMode)
-		{
-			if(GUILayout.Button(label, boldStyle))
-			{
-				_target.hideMode = mode;
-			}
+			_target.hideMode = newHideMode;
 		}
 		
-		else
+		if(newIsStatic != _target.isStatic)
 		{
-			if(GUILayout.Button(label))
-			{
-				_target.hideMode = mode;
-			}
-		}
-	}
-
-	public void drawStateButton(bool state, string label)
-	{
-		if(state == _target.isStatic)
-		{
-			if(GUILayout.Button(label, boldStyle))
-			{
-				_target.isStatic = state;
-			}
-		}
-		
-		else
-		{
-			if(GUILayout.Button(label))
-			{
-				_target.isStatic = state;
-			}
-		}
-	}
-	
-	public void drawColorButton(ColoredObject.ColorChoice buttonChoice, string label)
-	{
-		if(buttonChoice == _target.currentColor)
-		{
-			if(GUILayout.Button(label, boldStyle))
-			{
-				newColorChoice = buttonChoice;
-			}
-		}
-		
-		else
-		{
-			if(GUILayout.Button(label))
-			{
-				newColorChoice = buttonChoice;
-			}
+			_target.isStatic = newIsStatic;
 		}
 	}
 }

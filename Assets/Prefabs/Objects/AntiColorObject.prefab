@@ -15,7 +15,7 @@ GameObject:
   - 65: {fileID: 6577670}
   - 114: {fileID: 11400000}
   - 54: {fileID: 5471708}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: AntiColorObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}

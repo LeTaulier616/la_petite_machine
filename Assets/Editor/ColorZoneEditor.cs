@@ -10,64 +10,27 @@ public class ColorZoneEditor : Editor
 
 	ColorController.ColorChoice newColorChoice;
 
-	GUIStyle boldStyle;
-	GUIStyle headerStyle;
+	int colorGridInt;
+	string[] colorStrings = new string[] {"None", "Left", "Right"};
 
 	void OnEnable() 
 	{
 		_target = (ColorZone)target;
+
+		InitializeGridInts();
 	}
 
 	public override void OnInspectorGUI()
 	{
-		serializedObject.Update();
-		
 		newColorChoice = _target.zoneColor;
 		
-		headerStyle = new GUIStyle();
-		headerStyle.fontStyle = FontStyle.Bold;
-		headerStyle.normal.textColor = Color.white;
-		
-		boldStyle = new GUIStyle(GUI.skin.button);
-		boldStyle.fontStyle = FontStyle.Bold;
-		boldStyle.normal.textColor = Color.white;
+		EditorGUILayout.LabelField("Color", EditorStyles.boldLabel);
 
-		EditorGUILayout.LabelField("Color", headerStyle);
-		
-		EditorGUILayout.BeginHorizontal();
-								
-			GUI.backgroundColor = ColorController.Instance.colorParameters.leftColor;
-			
-			drawColorButton(ColorController.ColorChoice.Left, "Left");
-			
-			GUI.backgroundColor = ColorController.Instance.colorParameters.rightColor;
-			
-			drawColorButton(ColorController.ColorChoice.Right, "Right");
-		
-		EditorGUILayout.EndHorizontal();
+		colorGridInt = GUILayout.SelectionGrid(colorGridInt, colorStrings, 3);
 
-		if(newColorChoice != _target.zoneColor)
-		{
-			_target.zoneColor = newColorChoice;
-			_target.UpdateZoneVariables(_target.zoneColor, _target.volume);
-		}
+		UpdateEnums();
 
-		/*
-		EditorGUILayout.Space();
-
-		EditorGUIUtility.LookLikeInspector();
-
-		SerializedProperty cannons = serializedObject.FindProperty ("linkedCannons");
-
-		EditorGUI.BeginChangeCheck();
-
-			EditorGUILayout.PropertyField(cannons, true);
-
-		if(EditorGUI.EndChangeCheck())
-			serializedObject.ApplyModifiedProperties();
-
-		EditorGUIUtility.LookLikeControls();
-		*/
+		UpdateVariables();
 
 		if(GUI.changed)
 		{
@@ -75,22 +38,48 @@ public class ColorZoneEditor : Editor
 		}
 	}
 
-	public void drawColorButton(ColorController.ColorChoice buttonChoice, string label)
+	public void InitializeGridInts()
 	{
-		if(buttonChoice == _target.zoneColor)
+		switch(_target.zoneColor)
 		{
-			if(GUILayout.Button(label, boldStyle))
-			{
-				newColorChoice = buttonChoice;
-			}
+			case ColorController.ColorChoice.None:
+				colorGridInt = 0;
+				break;
+				
+			case ColorController.ColorChoice.Left:
+				colorGridInt = 1;
+				break;
+				
+			case ColorController.ColorChoice.Right:
+				colorGridInt = 2;
+				break;
 		}
-		
-		else
+	}
+
+	public void UpdateEnums()
+	{
+		switch(colorGridInt)
 		{
-			if(GUILayout.Button(label))
-			{
-				newColorChoice = buttonChoice;
-			}
+		case 0:
+			newColorChoice = ColorController.ColorChoice.None;
+			break;
+			
+		case 1:
+			newColorChoice = ColorController.ColorChoice.Left;
+			break;
+			
+		case 2:
+			newColorChoice = ColorController.ColorChoice.Right;
+			break;
+		}
+	}
+
+	public void UpdateVariables()
+	{
+		if(newColorChoice != _target.zoneColor)
+		{
+			_target.zoneColor = newColorChoice;
+			_target.UpdateZoneVariables(_target.zoneColor, _target.volume);
 		}
 	}
 }
